@@ -1,4 +1,4 @@
-package go_db_postgre_test
+package postgre_test
 
 import (
 	"sync"
