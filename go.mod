@@ -3,7 +3,7 @@ module github.com/cdvelop/postgre
 go 1.20
 
 require (
-	github.com/cdvelop/objectdb v0.0.1
+	github.com/cdvelop/objectdb v0.0.2
 	github.com/lib/pq v1.10.9
 )
 
