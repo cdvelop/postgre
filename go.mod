@@ -3,13 +3,13 @@ module github.com/cdvelop/postgre
 go 1.20
 
 require (
-	github.com/cdvelop/objectdb v0.0.2
+	github.com/cdvelop/objectdb v0.0.3
 	github.com/lib/pq v1.10.9
 )
 
 require (
-	github.com/cdvelop/dbtools v0.0.3 // indirect
-	github.com/cdvelop/input v0.0.2 // indirect
-	github.com/cdvelop/model v0.0.18 // indirect
+	github.com/cdvelop/dbtools v0.0.5 // indirect
+	github.com/cdvelop/input v0.0.3 // indirect
+	github.com/cdvelop/model v0.0.22 // indirect
 	golang.org/x/text v0.9.0 // indirect
 )
