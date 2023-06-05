@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/cdvelop/dbtools v0.0.7 // indirect
-	github.com/cdvelop/input v0.0.8 // indirect
+	github.com/cdvelop/input v0.0.9 // indirect
 	github.com/cdvelop/model v0.0.27 // indirect
 	golang.org/x/text v0.9.0 // indirect
 )
