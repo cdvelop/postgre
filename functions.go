@@ -30,3 +30,7 @@ func (d *PG) MakeSqInsertSyntax(i *byte, setValue *[]string) {
 	*setValue = append(*setValue, fmt.Sprintf("$%v", *i+1))
 	*i++
 }
+
+func (PG) DropTable() string {
+	return "DROP TABLE IF EXISTS %v CASCADE;"
+}

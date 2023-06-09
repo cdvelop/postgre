@@ -15,7 +15,3 @@ func (d *PG) SQLDropTable() string {
 func (d *PG) DBExists() string {
 	return "SELECT 1 FROM pg_database WHERE datname='%v';"
 }
-
-func (d *PG) ROLExists() string {
-	return "SELECT 1 FROM pg_user WHERE usename = '%v';"
-}

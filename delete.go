@@ -16,15 +16,6 @@ func (p *PG) DeleteAllTables(db *objectdb.Connection) {
 	}
 }
 
-// DeleteTABLE elimina tabla de una base de datos
-func (p *PG) DeleteTABLE(table_name string, db *objectdb.Connection) {
-	sql := fmt.Sprintf("DROP TABLE IF EXISTS %v CASCADE;", table_name)
-	if _, err := db.Exec(sql); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf(">>> Tabla %v eliminada\n", table_name)
-}
-
 func (p *PG) DeleteDataBase() {
 
 	PG, err := sql.Open("postgres", ConnectionString(p.passwordDatabase))

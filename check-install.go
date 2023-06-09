@@ -2,7 +2,6 @@ package postgre
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cdvelop/objectdb"
 )
@@ -21,10 +20,10 @@ func (p *PG) CHECK(db *objectdb.Connection) bool {
 
 		if ready = p.ExistDataBase("postgres", db); ready { //existe postgres?
 
-			if ready = p.ExistDataBaseROL(bkpDns.userDatabase, db); !ready { //verificar rol usuario app
+			if ready = ExistDataBaseROL(bkpDns.userDatabase, db); !ready { //verificar rol usuario app
 				//crear rol app
 				if ready = db.QueryWithoutANSWER(`CREATE USER `+bkpDns.userDatabase+` PASSWORD '`+p.passwordDatabase+`';`, ">>> creando rol PG"); !ready {
-					log.Fatalf("!!! error al crear rol: %v", bkpDns.userDatabase)
+					showErrorAndExit(fmt.Sprintf("!!! error al crear rol: %v", bkpDns.userDatabase))
 				}
 				fmt.Printf(">>> rol: %v creado\n", bkpDns.userDatabase)
 			}
@@ -48,7 +47,7 @@ func (p *PG) CHECK(db *objectdb.Connection) bool {
 			}
 
 		} else {
-			log.Fatalf("!!! error motor de base de datos %v no existe chequear instalación", p.DataBasEngine())
+			showErrorAndExit(fmt.Sprintf("!!! error motor de base de datos %v no existe chequear instalación", p.DataBasEngine()))
 		}
 	}
 	return false

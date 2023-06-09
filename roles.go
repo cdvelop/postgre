@@ -21,17 +21,15 @@ func (p *PG) DeleteRolDataBase(rol_name string, db *objectdb.Connection) {
 }
 
 // ExistDataBaseROL verifica  si rol usuario aplicación existe
-func (p *PG) ExistDataBaseROL(rol string, db *objectdb.Connection) bool {
-	sql := fmt.Sprintf(p.ROLExists(), rol)
-
-	return db.Exists("rol", rol, sql)
+func ExistDataBaseROL(rol string, db *objectdb.Connection) bool {
+	return db.Exists("rol", rol, "SELECT 1 FROM pg_user WHERE usename = '"+rol+"';")
 }
 
-func (p *PG) CreateUserRolDB(user_name, password string, db *objectdb.Connection) bool {
-	db.Set(p)
+func CreateUserRolDB(user_name, password string, db *objectdb.Connection) bool {
+	db.Open()
 	defer db.Close()
 
-	if ready := p.ExistDataBaseROL(user_name, db); !ready { //verificar rol usuario app
+	if ready := ExistDataBaseROL(user_name, db); !ready { //verificar rol usuario app
 
 		//crear rol app
 		if ready := db.QueryWithoutANSWER(`CREATE USER `+user_name+` PASSWORD '`+password+`';`, ">>> creando rol PG"); !ready {
@@ -41,7 +39,7 @@ func (p *PG) CreateUserRolDB(user_name, password string, db *objectdb.Connection
 
 	}
 
-	// sql := fmt.Sprintf(p.ROLExists(), user_name)
+	// sql := fmt.Sprintf(p.rolExists(), user_name)
 
 	return true
 }

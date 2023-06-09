@@ -1,5 +1,7 @@
 package postgre
 
+import "github.com/cdvelop/dbtools"
+
 // PG formato cadena conexión
 type PG struct {
 	dataBaseName     string //nombre de la base de datos
@@ -8,5 +10,5 @@ type PG struct {
 	userDatabase     string //usuario base de datos
 	passwordDatabase string //contraseña
 	backup_directory string //ej "D:\postgres_backup"
-
+	*dbtools.UnixID
 }
