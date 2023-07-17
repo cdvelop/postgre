@@ -1,11 +1,5 @@
 github.com/cdvelop/dbtools v0.0.17 h1:X+GsMqAHG6Pbyj2uAaK/SLjqGSxgT9K6wZWCeCKA1WE=
 github.com/cdvelop/dbtools v0.0.17/go.mod h1:NfQwYlGU1dFmZcUPs4bzwzKp5bC5r9TM72At6zPjdZE=
-github.com/cdvelop/input v0.0.12 h1:GLKu51QDn2LgMZUrQihaN3fDjW93Zd+k6cdJOsQfAYo=
-github.com/cdvelop/input v0.0.12/go.mod h1:1fb3io8X/ZAomsQVkdC+7qjsXNm+RRWORo/VRNKGN8c=
-github.com/cdvelop/model v0.0.30 h1:WddaVvJS1W26LoQ0vQd7z+0m5yNNMhQojaMBiPxJ7SM=
-github.com/cdvelop/model v0.0.30/go.mod h1:cYJNxbv1WV/aDgiVPV9VXs8LrbF8+0nU+X+KfSevyzw=
-github.com/cdvelop/objectdb v0.0.19 h1:+dsjfSuZ0n+L/qDbR9V02JuUnRTdeGY+EllNUqi+/Zg=
-github.com/cdvelop/objectdb v0.0.19/go.mod h1:0XGwzFmWueHU2LHMrDt3Fn3TBv6zNIOEpDojdYmqHqQ=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 golang.org/x/text v0.9.0 h1:2sjJmO8cDvYveuX97RDLsxlyUxLl+GHoLxBiRdHllBE=
