@@ -11,7 +11,7 @@ import (
 )
 
 // env_password_name ej: DB_PASSWORD_POSTGRE
-func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT, dataBaseName, directory_backup string, tables ...model.Object) *objectdb.Connection {
+func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT, dataBaseName, directory_backup string, tables ...*model.Object) *objectdb.Connection {
 
 	password, existe := os.LookupEnv(env_password_name)
 	if !existe {
@@ -33,8 +33,9 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 	// chequear tablas base de datos
 	for _, t := range tables {
 		if !dba.TableExist(t.Name, db) {
-			if !dbtools.CreateOneTABLE(db, t) {
-				showErrorAndExit(fmt.Sprintf("no se logro crear tabla: %v", t.Name))
+			err := dbtools.CreateOneTABLE(db, t)
+			if err != nil {
+				showErrorAndExit(fmt.Sprintf("no se logro crear tabla: %v\n%v", t.Name, err))
 			}
 		}
 	}
