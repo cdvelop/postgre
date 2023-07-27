@@ -1,7 +1,6 @@
 package postgre
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cdvelop/dbtools"
@@ -31,13 +30,9 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 	db := objectdb.Get(&dba)
 
 	// chequear tablas base de datos
-	for _, t := range tables {
-		if !dba.TableExist(t.Name, db) {
-			err := dbtools.CreateOneTABLE(db, t)
-			if err != nil {
-				showErrorAndExit(fmt.Sprintf("no se logro crear tabla: %v\n%v", t.Name, err))
-			}
-		}
+	err := db.CreateTablesInDB(tables...)
+	if err != nil {
+		showErrorAndExit(err.Error())
 	}
 
 	return db

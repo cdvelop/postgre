@@ -34,3 +34,12 @@ func (d *PG) MakeSqInsertSyntax(i *byte, setValue *[]string) {
 func (PG) DropTable() string {
 	return "DROP TABLE IF EXISTS %v CASCADE;"
 }
+
+func (PG) SQLTableExist() string {
+	return `SELECT EXISTS (
+		SELECT 1
+		FROM information_schema.tables
+		WHERE table_schema = 'public'
+		AND table_name = $1
+	)`
+}
