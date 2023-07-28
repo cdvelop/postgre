@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/cdvelop/dbtools v0.0.25
-	github.com/cdvelop/model v0.0.34
-	github.com/cdvelop/objectdb v0.0.37
+	github.com/cdvelop/model v0.0.35
+	github.com/cdvelop/objectdb v0.0.38
 	github.com/lib/pq v1.10.9
 )
 
@@ -17,7 +17,8 @@ require (
 
 replace github.com/cdvelop/model => ../model
 
-// replace github.com/cdvelop/input => ../input
+replace github.com/cdvelop/input => ../input
+
 replace github.com/cdvelop/objectdb => ../objectdb
 
 replace github.com/cdvelop/dbtools => ../dbtools
