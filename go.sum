@@ -1,5 +1,5 @@
-github.com/cdvelop/gotools v0.0.22 h1:0raRsp0pdLHDUeCFiPN9cAzB/86Z486yGSljgFFLXlc=
-github.com/cdvelop/gotools v0.0.22/go.mod h1:ongDeo65K1NCsus8LSNeJKcnaPGatxPpN++o3HYGOJ4=
+github.com/cdvelop/gotools v0.0.23 h1:DSYGuJ4dBqfLniMjNHqryhryIvsFk6PPMf/0F2x1stg=
+github.com/cdvelop/gotools v0.0.23/go.mod h1:ongDeo65K1NCsus8LSNeJKcnaPGatxPpN++o3HYGOJ4=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 golang.org/x/text v0.11.0 h1:LAntKIrcmeSKERyiOh0XMV39LXS8IE9UL2yP7+f5ij4=
