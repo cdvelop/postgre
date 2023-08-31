@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/cdvelop/gotools v0.0.30 // indirect
-	github.com/cdvelop/input v0.0.24 // indirect
+	github.com/cdvelop/input v0.0.26 // indirect
 )
 
 replace github.com/cdvelop/model => ../model
