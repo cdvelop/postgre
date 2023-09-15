@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/cdvelop/dbtools v0.0.25
-	github.com/cdvelop/model v0.0.45
+	github.com/cdvelop/model v0.0.46
 	github.com/cdvelop/objectdb v0.0.37
 	github.com/lib/pq v1.10.9
 )
