@@ -30,7 +30,7 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 	db := objectdb.Get(&dba)
 
 	// chequear tablas base de datos
-	err := db.CreateTablesInDB(tables...)
+	err := db.CreateTablesInDB(tables, nil)
 	if err != nil {
 		showErrorAndExit(err.Error())
 	}
