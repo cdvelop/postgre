@@ -2,10 +2,12 @@ package postgre
 
 import (
 	"os"
+	"sync"
 
-	"github.com/cdvelop/dbtools"
 	"github.com/cdvelop/model"
 	"github.com/cdvelop/objectdb"
+	"github.com/cdvelop/timeserver"
+	"github.com/cdvelop/unixid"
 	_ "github.com/lib/pq"
 )
 
@@ -17,6 +19,11 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 		showErrorAndExit("valor password db variable de entorno: " + env_password_name + " no encontrado")
 	}
 
+	uid, err := unixid.NewHandler(timeserver.TimeServer{}, &sync.Mutex{}, nil)
+	if err != nil {
+		showErrorAndExit(err.Error())
+	}
+
 	dba := PG{
 		dataBaseName:     dataBaseName,
 		ipLocalServer:    iPLocalServer,
@@ -24,13 +31,13 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 		userDatabase:     userDatabase,
 		passwordDatabase: password,
 		backup_directory: directory_backup,
-		UnixID:           dbtools.NewUnixIdHandler(),
+		UnixID:           uid,
 	}
 
 	db := objectdb.Get(&dba)
 
 	// chequear tablas base de datos
-	err := db.CreateTablesInDB(tables, nil)
+	err = db.CreateTablesInDB(tables, nil)
 	if err != nil {
 		showErrorAndExit(err.Error())
 	}
