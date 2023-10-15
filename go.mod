@@ -12,7 +12,7 @@ require (
 
 require (
 	github.com/cdvelop/dbtools v0.0.41 // indirect
-	github.com/cdvelop/gotools v0.0.42 // indirect
+	github.com/cdvelop/gotools v0.0.43 // indirect
 	github.com/cdvelop/input v0.0.34 // indirect
 	github.com/cdvelop/timetools v0.0.4 // indirect
 	golang.org/x/text v0.13.0 // indirect
