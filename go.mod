@@ -3,7 +3,7 @@ module github.com/cdvelop/postgre
 go 1.20
 
 require (
-	github.com/cdvelop/model v0.0.69
+	github.com/cdvelop/model v0.0.70
 	github.com/cdvelop/objectdb v0.0.66
 	github.com/cdvelop/timeserver v0.0.1
 	github.com/cdvelop/unixid v0.0.2
@@ -15,7 +15,7 @@ require (
 	github.com/cdvelop/gotools v0.0.43 // indirect
 	github.com/cdvelop/input v0.0.34 // indirect
 	github.com/cdvelop/strings v0.0.7 // indirect
-	github.com/cdvelop/timetools v0.0.4 // indirect
+	github.com/cdvelop/timetools v0.0.19 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
 
