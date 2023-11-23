@@ -20,8 +20,8 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 	}
 
 	uid, err := unixid.NewHandler(timeserver.TimeServer{}, &sync.Mutex{}, nil)
-	if err != nil {
-		showErrorAndExit(err.Error())
+	if err != "" {
+		showErrorAndExit(err)
 	}
 
 	dba := PG{
@@ -37,9 +37,9 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 	db := objectdb.Get(&dba)
 
 	// chequear tablas base de datos
-	db.CreateTablesInDB(tables, func(err error) {
-		if err != nil {
-			showErrorAndExit(err.Error())
+	db.CreateTablesInDB(tables, func(err string) {
+		if err != "" {
+			showErrorAndExit(err)
 		}
 	})
 
