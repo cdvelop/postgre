@@ -3,10 +3,10 @@ module github.com/cdvelop/postgre
 go 1.20
 
 require (
-	github.com/cdvelop/model v0.0.75
-	github.com/cdvelop/objectdb v0.0.88
-	github.com/cdvelop/timeserver v0.0.23
-	github.com/cdvelop/unixid v0.0.24
+	github.com/cdvelop/model v0.0.76
+	github.com/cdvelop/objectdb v0.0.89
+	github.com/cdvelop/timeserver v0.0.24
+	github.com/cdvelop/unixid v0.0.25
 	github.com/lib/pq v1.10.9
 )
 
@@ -15,7 +15,7 @@ require (
 	github.com/cdvelop/input v0.0.59 // indirect
 	github.com/cdvelop/maps v0.0.7 // indirect
 	github.com/cdvelop/strings v0.0.7 // indirect
-	github.com/cdvelop/timetools v0.0.24 // indirect
+	github.com/cdvelop/timetools v0.0.25 // indirect
 )
 
 replace github.com/cdvelop/model => ../model
