@@ -25,18 +25,22 @@ func (d *PG) backupDBWindows() {
 
 	pg_dump := fmt.Sprintf("%v/bin/pg_dump.exe", installation_directory)
 
-	name_file_backup := d.GetNewID() + "-d.backup"
+	name_file_backup, err := d.GetNewID()
+	if err != "" {
+		log.Println("backupDBWindows error" + err)
+	}
+	name_file_backup += "-d.backup"
 
 	destination_directory := d.backup_directory + "/" + name_file_backup
 	// cmd := exec.Command("D:/Program Files/FreeFileSync/FreeFileSync.exe", "D:/cesar/SyncWin/SyncSettings.ffs_batch")
 
-	out, err := exec.Command(pg_dump, "-Fc", d.ConnectionString()).Output()
-	if err != nil {
-		fmt.Printf("¡ERROR EN EL COMANDO RESPALDO BASE DE DATOS! %s\n", err)
+	out, er := exec.Command(pg_dump, "-Fc", d.ConnectionString()).Output()
+	if er != nil {
+		fmt.Printf("¡ERROR EN EL COMANDO RESPALDO BASE DE DATOS! %s\n", er)
 	} else {
-		err = os.WriteFile(destination_directory, out, 0666)
-		if err != nil {
-			log.Printf("¡ERROR AL GUARDAR ARCHIVO RESPALDO DB! %v\n", err)
+		er = os.WriteFile(destination_directory, out, 0666)
+		if er != nil {
+			log.Printf("¡ERROR AL GUARDAR ARCHIVO RESPALDO DB! %v\n", er)
 		} else {
 			log.Printf(">>> BACKUP BASE DE DATOS %v\n", name_file_backup)
 			d.maintenanceBackupDirectory()
