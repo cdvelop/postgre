@@ -1,11 +1,11 @@
-github.com/cdvelop/dbtools v0.0.70 h1:Ox994JZzx8a4TGEFc7wdmbcF28wt1R/ZygYc/qStLek=
-github.com/cdvelop/dbtools v0.0.70/go.mod h1:p4Bb8VCQb7cLUmK6S1Y2vYcQZSEwn+V/pqovq7+JgDw=
+github.com/cdvelop/dbtools v0.0.71 h1:DMBvgJXWyjCXz0pZLMvSai44cQfMCWz+3j6O3R2enEU=
+github.com/cdvelop/dbtools v0.0.71/go.mod h1:YDPdpBVnAIge0yTGLsarpGYMqIwy0DMkw21L3OCzGEk=
 github.com/cdvelop/input v0.0.67 h1:69G8vK4Nn+kVMb+bF4TTKIiPjsjvoq4eYn9WgcQicSs=
 github.com/cdvelop/input v0.0.67/go.mod h1:ZjEAThue9JR2NvvAxgVBiGjwIi60KMnTowqOD1cyH3E=
 github.com/cdvelop/maps v0.0.8 h1:7pc/iRC5mhf91TB8TaGoXkyFloH1pH1TWbLBR4kZhZY=
 github.com/cdvelop/maps v0.0.8/go.mod h1:00f/VqX/M0iiiY/BG2KxfxfFuoU5jAaNLEDGw7Tlduk=
-github.com/cdvelop/model v0.0.95 h1:8OEcgnOgPC2BsY/ZuM7a6wBIWOypKA4Da2DSi5sQtuA=
-github.com/cdvelop/model v0.0.95/go.mod h1:cYJNxbv1WV/aDgiVPV9VXs8LrbF8+0nU+X+KfSevyzw=
+github.com/cdvelop/model v0.0.96 h1:z9KC3WxuMdDmQ5JdQs2yNmC5hddy4d4+1Oln0TqV7uo=
+github.com/cdvelop/model v0.0.96/go.mod h1:cYJNxbv1WV/aDgiVPV9VXs8LrbF8+0nU+X+KfSevyzw=
 github.com/cdvelop/objectdb v0.0.99 h1:4NGWBbYHPc+25elgv9Qgvg4UDt8tl5FbO8PFBXe6EXM=
 github.com/cdvelop/objectdb v0.0.99/go.mod h1:qZwXaS//2X+9YvEhtCj9W1qCvYLmCTc/cbWN/Cnpp0g=
 github.com/cdvelop/strings v0.0.9 h1:yDh2msl3EQja0dHw+oOHfD9ymQMa50KakKTkjsXDnvw=
@@ -14,7 +14,7 @@ github.com/cdvelop/timeserver v0.0.31 h1:+Yt1ydpmtNDMJbFu29hcnmkwtK+BW+gBQyhbVVA
 github.com/cdvelop/timeserver v0.0.31/go.mod h1:SlkQhKGvIxBfAlLDB3biA3JXbrvRRxwv28hyvfVMz0s=
 github.com/cdvelop/timetools v0.0.32 h1:tQPO4BwrEBrIGVMZHhsoYYeu8UXyF6hicm/Q54SET6k=
 github.com/cdvelop/timetools v0.0.32/go.mod h1:Y6C9bgqYnwI+WUuIiJs5VlfyNdVPsCN+42LxUB1S2yo=
-github.com/cdvelop/unixid v0.0.33 h1:ITLOqU/dxx3ElOUpDwE9gLFt7co71ESdIyqHz6pNKrM=
-github.com/cdvelop/unixid v0.0.33/go.mod h1:l61rv9uiE+NUWiFs5Jwgo0dmEy3FTxLAcbThLPsnfzQ=
+github.com/cdvelop/unixid v0.0.34 h1:UgIR07tzDLvKq8UBhXeNgrcXVwWRmy0McT/hzi2XG0E=
+github.com/cdvelop/unixid v0.0.34/go.mod h1:vj9HhiDsy6zX1leAa/4IM75NV42yki/GGxYAcx+1J8o=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
