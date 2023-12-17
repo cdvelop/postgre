@@ -1,7 +1,7 @@
 github.com/cdvelop/dbtools v0.0.77 h1:5kOiyHIltMeGduj9P+Tj6ICKUFDcnc8VD0lN915O7zQ=
 github.com/cdvelop/dbtools v0.0.77/go.mod h1:wMvKTRxGBRofDoXVDEYBgBpq9NpKFzZHltVPV8jwbSQ=
-github.com/cdvelop/input v0.0.74 h1:cmWGapOQ4utj7bXRqmGITAMlOfmVQ5AsNUolItz8e5o=
-github.com/cdvelop/input v0.0.74/go.mod h1:dSC3vWPEe6DmOX8Q+tR9O9rec+2QGWinVQxmLnFSGSM=
+github.com/cdvelop/input v0.0.75 h1:MCwzCxzaKgzqAGya1saGQFTOC3hoFjz8UHBTG6yHNoY=
+github.com/cdvelop/input v0.0.75/go.mod h1:dSC3vWPEe6DmOX8Q+tR9O9rec+2QGWinVQxmLnFSGSM=
 github.com/cdvelop/maps v0.0.8 h1:7pc/iRC5mhf91TB8TaGoXkyFloH1pH1TWbLBR4kZhZY=
 github.com/cdvelop/maps v0.0.8/go.mod h1:00f/VqX/M0iiiY/BG2KxfxfFuoU5jAaNLEDGw7Tlduk=
 github.com/cdvelop/strings v0.0.9 h1:yDh2msl3EQja0dHw+oOHfD9ymQMa50KakKTkjsXDnvw=
