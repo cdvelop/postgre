@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/cdvelop/model v0.0.102
-	github.com/cdvelop/objectdb v0.0.103
+	github.com/cdvelop/objectdb v0.0.107
 	github.com/cdvelop/timeserver v0.0.31
-	github.com/cdvelop/unixid v0.0.41
+	github.com/cdvelop/unixid v0.0.44
 	github.com/lib/pq v1.10.9
 )
 

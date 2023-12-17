@@ -19,7 +19,7 @@ func NewConnection(userDatabase, env_password_name, iPLocalServer, dataBasePORT,
 		showErrorAndExit("valor password db variable de entorno: " + env_password_name + " no encontrado")
 	}
 
-	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, nil)
+	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, unixid.NoSessionNumber{})
 	if err != "" {
 		showErrorAndExit(err)
 	}
