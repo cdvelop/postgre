@@ -1,7 +1,7 @@
 github.com/cdvelop/dbtools v0.0.80 h1:5ddiqQHtupwBI72HmwWBoYWMQhZyqWVzNTH8UmwATT4=
 github.com/cdvelop/dbtools v0.0.80/go.mod h1:9vLK93F4GUpgenQsxmn91IJtxZKjEaRfcoQUmqaoHVs=
-github.com/cdvelop/input v0.0.77 h1:2NQ9+/RgE+4ES7gi6RcBwK10gSMoTxdxQP+QsWxq28Q=
-github.com/cdvelop/input v0.0.77/go.mod h1:phQj6lxRpgxcxaJljgESZ2EKKUVMcNXs+aYJj9vKmv8=
+github.com/cdvelop/input v0.0.80 h1:hQ+al2Fp3xqIfE3Sw7K8RxZKq//6C5LMwCfJxFdA+eM=
+github.com/cdvelop/input v0.0.80/go.mod h1:OfsLjbfzG7jHXr57U2x81vESEnWJ6XSIhRrhpIDFj6Y=
 github.com/cdvelop/maps v0.0.8 h1:7pc/iRC5mhf91TB8TaGoXkyFloH1pH1TWbLBR4kZhZY=
 github.com/cdvelop/maps v0.0.8/go.mod h1:00f/VqX/M0iiiY/BG2KxfxfFuoU5jAaNLEDGw7Tlduk=
 github.com/cdvelop/strings v0.0.9 h1:yDh2msl3EQja0dHw+oOHfD9ymQMa50KakKTkjsXDnvw=
@@ -10,7 +10,7 @@ github.com/cdvelop/timeserver v0.0.31 h1:+Yt1ydpmtNDMJbFu29hcnmkwtK+BW+gBQyhbVVA
 github.com/cdvelop/timeserver v0.0.31/go.mod h1:SlkQhKGvIxBfAlLDB3biA3JXbrvRRxwv28hyvfVMz0s=
 github.com/cdvelop/timetools v0.0.32 h1:tQPO4BwrEBrIGVMZHhsoYYeu8UXyF6hicm/Q54SET6k=
 github.com/cdvelop/timetools v0.0.32/go.mod h1:Y6C9bgqYnwI+WUuIiJs5VlfyNdVPsCN+42LxUB1S2yo=
-github.com/cdvelop/unixid v0.0.46 h1:a30VgRooG2w1e0g0Xvcltvzino+NtEXsy1cXtYOiM4I=
-github.com/cdvelop/unixid v0.0.46/go.mod h1:in5rAvZBhNVql/c3s+0LGjyeZJVoZnoGJcnKDX+4Oog=
+github.com/cdvelop/unixid v0.0.47 h1:GAI7xFpo4MHgTZl6DuD3D8W6+M+N3qDdxg9iLyw1W4g=
+github.com/cdvelop/unixid v0.0.47/go.mod h1:e8KY6BpSB3wV8xkruJuAHRQ24TH9fv7slJVPlJlO3oA=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
