@@ -3,8 +3,8 @@ module github.com/cdvelop/postgre
 go 1.20
 
 require (
-	github.com/cdvelop/model v0.0.108
-	github.com/cdvelop/objectdb v0.0.113
+	github.com/cdvelop/model v0.0.111
+	github.com/cdvelop/objectdb v0.0.114
 	github.com/cdvelop/timeserver v0.0.32
 	github.com/cdvelop/unixid v0.0.49
 	github.com/lib/pq v1.10.9
