@@ -26,6 +26,10 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 		dba.DataBasePORT = "5432"
 	}
 
+	if dba.IPLocalServer == "" {
+		dba.IPLocalServer = "127.0.0.1"
+	}
+
 	dba.passwordDB = password
 
 	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, unixid.NoSessionNumber{})

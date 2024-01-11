@@ -10,8 +10,8 @@ type ScheduleAdapter interface {
 type PG struct {
 	UserDB          string //usuario base de datos
 	EnvPasswordName string // ej: APP_PASSWORD
-	IPLocalServer   string //ip servidor donde estará la base de datos
-	DataBasePORT    string //puerto defaul: 5432
+	IPLocalServer   string //ip servidor donde estará la base de datos default: "127.0.0.1"
+	DataBasePORT    string //puerto default: 5432
 	DBName          string //nombre de la base de datos
 
 	BackupDirectory     string //ej "D:\postgres_backup"
