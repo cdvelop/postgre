@@ -22,6 +22,10 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 		showErrorAndExit("valor password db variable de entorno: " + dba.EnvPasswordName + " no encontrado")
 	}
 
+	if dba.DataBasePORT == "" {
+		dba.DataBasePORT = "5432"
+	}
+
 	dba.passwordDB = password
 
 	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, unixid.NoSessionNumber{})

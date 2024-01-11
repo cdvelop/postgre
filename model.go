@@ -11,7 +11,7 @@ type PG struct {
 	UserDB          string //usuario base de datos
 	EnvPasswordName string // ej: APP_PASSWORD
 	IPLocalServer   string //ip servidor donde estará la base de datos
-	DataBasePORT    string //puerto
+	DataBasePORT    string //puerto defaul: 5432
 	DBName          string //nombre de la base de datos
 
 	BackupDirectory     string //ej "D:\postgres_backup"
