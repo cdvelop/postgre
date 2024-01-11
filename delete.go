@@ -11,23 +11,23 @@ import (
 func (p *PG) DeleteAllTables(db *objectdb.Connection) {
 	sql := `DROP SCHEMA IF EXISTS public CASCADE;
 	        CREATE SCHEMA public;`
-	if !db.QueryWithoutANSWER(sql, "") {
+	if db.QueryWithoutANSWER(sql) != "" {
 		log.Fatalln("ERROR EN DeleteAllTables")
 	}
 }
 
 func (p *PG) DeleteDataBase() {
 
-	PG, err := sql.Open("postgres", ConnectionString(p.passwordDatabase))
+	PG, err := sql.Open("postgres", ConnectionString(p.passwordDB))
 	if err != nil {
 		log.Fatalf("¡Error de conexión %v!", err)
 	}
 	defer PG.Close()
 
-	_, err = PG.Exec("DROP DATABASE IF EXISTS " + p.dataBaseName + ";")
+	_, err = PG.Exec("DROP DATABASE IF EXISTS " + p.DBName + ";")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Printf("¡¡¡ BASE DE DATOS %v HA SIDO ELIMINADA!!!", p.dataBaseName)
+	fmt.Printf("¡¡¡ BASE DE DATOS %v HA SIDO ELIMINADA!!!", p.DBName)
 }

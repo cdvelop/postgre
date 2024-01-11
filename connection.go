@@ -9,13 +9,13 @@ func (d PG) DataBasEngine() string {
 
 //ej "mydb"
 func (d PG) DataBaseName() string {
-	return d.dataBaseName
+	return d.DBName
 }
 
 // ConnectionString formato cadena de conexión
-// postgres:// user : passwordDatabase  @  127.0.0.1  :  5432 / nombrebasedatos   ?sslmode=disable"
+// postgres:// user : passwordDB  @  127.0.0.1  :  5432 / nombrebasedatos   ?sslmode=disable"
 func (d *PG) ConnectionString() string {
-	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", d.userDatabase, d.passwordDatabase, d.ipLocalServer, d.dataBasePORT, d.dataBaseName)
+	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", d.UserDB, d.passwordDB, d.IPLocalServer, d.DataBasePORT, d.DBName)
 }
 
 // conexión string por defecto postgres

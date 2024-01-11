@@ -12,12 +12,12 @@ func (p *PG) DeleteRolDataBase(rol_name string, db *objectdb.Connection) {
 	db.Set(p) //seteo el pool de conexiones
 	newdb := db
 	defer newdb.Close()
-	sql := fmt.Sprintf("DROP ROLE IF EXISTS %v;", dnsBkp.userDatabase)
+	sql := fmt.Sprintf("DROP ROLE IF EXISTS %v;", dnsBkp.UserDB)
 	if _, err := newdb.Exec(sql); err != nil {
 		log.Fatalf("error %v al eliminar rol usuario base de datos sql: %v ", err, sql)
 	}
 	*p = dnsBkp
-	fmt.Printf(">>> Usuario PG Rol [%v] Eliminado !!!\n", dnsBkp.dataBaseName)
+	fmt.Printf(">>> Usuario PG Rol [%v] Eliminado !!!\n", dnsBkp.DBName)
 }
 
 // ExistDataBaseROL verifica  si rol usuario aplicación existe
@@ -32,9 +32,11 @@ func CreateUserRolDB(user_name, password string, db *objectdb.Connection) bool {
 	if ready := ExistDataBaseROL(user_name, db); !ready { //verificar rol usuario app
 
 		//crear rol app
-		if ready := db.QueryWithoutANSWER(`CREATE USER `+user_name+` PASSWORD '`+password+`';`, ">>> creando rol PG"); !ready {
+		if err := db.QueryWithoutANSWER(`CREATE USER ` + user_name + ` PASSWORD '` + password + `';`); err != "" {
 			log.Fatalf("!!! error al crear rol: %v", user_name)
 			return false
+		} else {
+			fmt.Println(">>> rol PG creado")
 		}
 
 	}

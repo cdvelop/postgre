@@ -7,6 +7,11 @@ import (
 )
 
 func (d *PG) DataBaseMaintenance(db *objectdb.Connection) {
-	res := db.QueryWithoutANSWER(`VACUUM FULL ANALYZE;`, "Realizando Mantenimiento Db")
-	log.Printf("Mantenimiento DB Finalizado Correctamente? [%v]\n", res)
+	err := db.QueryWithoutANSWER(`VACUUM FULL ANALYZE;`)
+	if err != "" {
+		log.Println("error mantenimiento db: " + err)
+
+	} else {
+		log.Println("mantenimiento db:" + d.DBName + " finalizado Correctamente")
+	}
 }

@@ -2,7 +2,6 @@ package postgre
 
 import (
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -26,7 +25,7 @@ func postgresWindowsDirectory() (out_path, version string) {
 	}
 
 	if out_path == "" {
-		log.Fatalln("¡¡¡ ERROR POSTGRES SQL NO INSTALADO !!!")
+		showErrorAndExit("¡¡¡ POSTGRES SQL NO INSTALADO !!!")
 	}
 
 	return

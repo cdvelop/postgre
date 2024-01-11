@@ -21,10 +21,10 @@ func (p *PG) DeleleDataBASE(db *objectdb.Connection) {
 	db.Set(p)
 
 	defer db.Close()
-	sql := fmt.Sprintf("DROP DATABASE IF EXISTS %v;", dnsBkp.dataBaseName)
+	sql := fmt.Sprintf("DROP DATABASE IF EXISTS %v;", dnsBkp.DBName)
 	if _, err := db.Exec(sql); err != nil {
 		log.Fatalf("error %v al eliminar base de datos sql: %v ", err, sql)
 	}
 	*p = dnsBkp
-	fmt.Printf(">>> Base de datos [%v] Eliminada !!!\n", dnsBkp.dataBaseName)
+	fmt.Printf(">>> Base de datos [%v] Eliminada !!!\n", dnsBkp.DBName)
 }

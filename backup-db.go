@@ -25,13 +25,13 @@ func (d *PG) backupDBWindows() {
 
 	pg_dump := fmt.Sprintf("%v/bin/pg_dump.exe", installation_directory)
 
-	name_file_backup, err := d.GetNewID()
+	name_file_backup, err := d.idUnix.GetNewID()
 	if err != "" {
 		log.Println("backupDBWindows error" + err)
 	}
 	name_file_backup += "-d.backup"
 
-	destination_directory := d.backup_directory + "/" + name_file_backup
+	destination_directory := d.BackupDirectory + "/" + name_file_backup
 	// cmd := exec.Command("D:/Program Files/FreeFileSync/FreeFileSync.exe", "D:/cesar/SyncWin/SyncSettings.ffs_batch")
 
 	out, er := exec.Command(pg_dump, "-Fc", d.ConnectionString()).Output()
@@ -53,7 +53,7 @@ func (d *PG) RestoreDataBase(file_name string) bool {
 	pg_restore := fmt.Sprintf("%v/bin/pg_restore.exe", installation_directory)
 	//pg_restore [Connection-option…] [option…] [filename]
 
-	dbname := fmt.Sprintf("--dbname=postgres://postgres:%v@127.0.0.1:5432/postgres?sslmode=disable", d.passwordDatabase)
+	dbname := fmt.Sprintf("--dbname=postgres://postgres:%v@127.0.0.1:5432/postgres?sslmode=disable", d.passwordDB)
 
 	// command := fmt.Sprintf(`"%v" %v --create %v`, pg_restore, dbname, file_name)
 	// fmt.Printf("CADENA A CONECTAR:\n%v", command)
@@ -72,13 +72,13 @@ func (d *PG) RestoreDataBase(file_name string) bool {
 
 func (d *PG) maintenanceBackupDirectory() {
 
-	oldest_file, total_files, err := findOldestFile(d.backup_directory)
+	oldest_file, total_files, err := findOldestFile(d.BackupDirectory)
 	if err != nil {
 		log.Println("¡ERROR AL OBTENER FICHERO MAS ANTIGUO DEL DIRECTORIO DB BACKUP! " + err.Error())
 	}
 
 	if total_files > 5 { //solo mantener 5 respaldos
-		e := os.Remove(d.backup_directory + "/" + oldest_file.Name())
+		e := os.Remove(d.BackupDirectory + "/" + oldest_file.Name())
 		if e != nil {
 			log.Println("¡ERROR AL ELIMINAR FICHERO: " + oldest_file.Name() + " RESPALDO ANTIGUO! " + e.Error())
 		}
