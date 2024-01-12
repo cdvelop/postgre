@@ -64,6 +64,12 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 			if err != "" {
 				log.Println(e + err)
 			}
+
+			err = checkDir(dba.BackupDirectory)
+			if err != "" {
+				log.Println(e + err)
+			}
+
 		}
 
 		if dba.ScheduleMaintenance != "" {
