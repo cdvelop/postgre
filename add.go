@@ -30,6 +30,14 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 		dba.IPLocalServer = "127.0.0.1"
 	}
 
+	if dba.BackupDirectory == "" {
+		dba.BackupDirectory = "./backupdb"
+	}
+
+	if dba.TotalBackupsMaintain == 0 {
+		dba.TotalBackupsMaintain = 1
+	}
+
 	dba.passwordDB = password
 
 	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, unixid.NoSessionNumber{})
@@ -60,7 +68,7 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 
 		if dba.ScheduleMaintenance != "" {
 
-			err := dba.AddFuncToSchedule(dba.ScheduleBackup, "mantenimiento base de datos:"+dba.DBName, dba.DataBaseMaintenance, db)
+			err := dba.AddFuncToSchedule(dba.ScheduleMaintenance, "mantenimiento base de datos:"+dba.DBName, dba.DataBaseMaintenance, db)
 			if err != "" {
 				log.Println(e + err)
 			}

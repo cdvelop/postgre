@@ -13,39 +13,43 @@ func (d *PG) BackupDataBase() {
 
 	switch runtime.GOOS {
 	case "windows":
-		d.backupDBWindows()
+		d.backupWindowsDB()
 	default:
-		log.Println("BACKUP POSTGRES LINUX NO IMPLEMENTADO")
+		log.Println("error backup postgres db en sistema operativo: " + runtime.GOOS + " no implementado")
 	}
 
 }
 
-func (d *PG) backupDBWindows() {
+func (d *PG) backupWindowsDB() {
 	//pg_dump.exe -Fc postgresql://pa100t:73D-s137v4sDB@127.0.0.1:5432/pa100t > D:\postgres_backup\pa100t.backup
-
+	const e = "backupWindowsDB error "
 	pg_dump := fmt.Sprintf("%v/bin/pg_dump.exe", installation_directory)
 
 	name_file_backup, err := d.idUnix.GetNewID()
 	if err != "" {
-		log.Println("backupDBWindows error" + err)
+		log.Println(e + err)
+		return
 	}
-	name_file_backup += "-d.backup"
+	name_file_backup += "-db.backup"
 
 	destination_directory := d.BackupDirectory + "/" + name_file_backup
 	// cmd := exec.Command("D:/Program Files/FreeFileSync/FreeFileSync.exe", "D:/cesar/SyncWin/SyncSettings.ffs_batch")
 
 	out, er := exec.Command(pg_dump, "-Fc", d.ConnectionString()).Output()
 	if er != nil {
-		fmt.Printf("¡ERROR EN EL COMANDO RESPALDO BASE DE DATOS! %s\n", er)
-	} else {
-		er = os.WriteFile(destination_directory, out, 0666)
-		if er != nil {
-			log.Printf("¡ERROR AL GUARDAR ARCHIVO RESPALDO DB! %v\n", er)
-		} else {
-			log.Printf(">>> BACKUP BASE DE DATOS %v\n", name_file_backup)
-			d.maintenanceBackupDirectory()
-		}
+		log.Printf("¡error en el comando de respaldo! %s\n", er)
+		return
 	}
+
+	er = os.WriteFile(destination_directory, out, 0666)
+	if er != nil {
+		log.Printf(e+"¡al guardar archivo respaldo! %v\n", er)
+		return
+	}
+
+	// log.Printf(">>> backup base de datos %v\n", name_file_backup)
+	d.maintenanceBackupDirectory()
+
 }
 
 func (d *PG) RestoreDataBase(file_name string) bool {
@@ -72,15 +76,18 @@ func (d *PG) RestoreDataBase(file_name string) bool {
 
 func (d *PG) maintenanceBackupDirectory() {
 
+	const e = "maintenanceBackupDirectory error "
+
 	oldest_file, total_files, err := findOldestFile(d.BackupDirectory)
-	if err != nil {
-		log.Println("¡ERROR AL OBTENER FICHERO MAS ANTIGUO DEL DIRECTORIO DB BACKUP! " + err.Error())
+	if err != "" {
+		log.Println(e + err)
+		return
 	}
 
-	if total_files > 5 { //solo mantener 5 respaldos
-		e := os.Remove(d.BackupDirectory + "/" + oldest_file.Name())
-		if e != nil {
-			log.Println("¡ERROR AL ELIMINAR FICHERO: " + oldest_file.Name() + " RESPALDO ANTIGUO! " + e.Error())
+	if total_files > d.TotalBackupsMaintain {
+		er := os.Remove(d.BackupDirectory + "/" + oldest_file.Name())
+		if er != nil {
+			log.Println(e + "¡al eliminar fichero: " + oldest_file.Name() + " respaldo anterior! " + er.Error())
 		}
 	}
 }

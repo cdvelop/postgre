@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
-func findOldestFile(dir string) (oldestFile os.FileInfo, total_files int, err error) {
-	dir_files, err := os.ReadDir(dir)
-	if err != nil {
+func findOldestFile(dir string) (oldestFile os.FileInfo, total_files int, err string) {
+	const e = "findOldestFile "
+	dir_files, er := os.ReadDir(dir)
+	if er != nil {
+		err = e + er.Error()
 		return
 	}
 
@@ -18,7 +20,7 @@ func findOldestFile(dir string) (oldestFile os.FileInfo, total_files int, err er
 
 		file, er := dir_file.Info()
 		if er != nil {
-			err = er
+			err = e + er.Error()
 			return
 		}
 
@@ -29,7 +31,7 @@ func findOldestFile(dir string) (oldestFile os.FileInfo, total_files int, err er
 	}
 
 	if oldestFile == nil {
-		err = os.ErrNotExist
+		err = e + os.ErrNotExist.Error()
 	}
 	return
 }

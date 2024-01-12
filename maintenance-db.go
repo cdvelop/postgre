@@ -12,6 +12,6 @@ func (d *PG) DataBaseMaintenance(db *objectdb.Connection) {
 		log.Println("error mantenimiento db: " + err)
 
 	} else {
-		log.Println("mantenimiento db:" + d.DBName + " finalizado Correctamente")
+		log.Println("mantenimiento db:" + d.DBName + " ok")
 	}
 }
