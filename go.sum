@@ -10,7 +10,7 @@ github.com/cdvelop/timeserver v0.0.36 h1:q+upU3ct7zwYIeemBkH02ujUQk/46OIGZEx9r8V
 github.com/cdvelop/timeserver v0.0.36/go.mod h1:NLT9JU5ZVwuTbbIAsxKvNseKqxrtdtlKpNKKbAFkHlI=
 github.com/cdvelop/timetools v0.0.42 h1:yfSsGsfTw4QdXylseYXrmoGEtwzYJ/kGlF8a22Lv4f4=
 github.com/cdvelop/timetools v0.0.42/go.mod h1:FLXt6dvkY4x3rjgRYX7J5XK2H6aHIdxV+fBA+Apj7J8=
-github.com/cdvelop/unixid v0.0.52 h1:D8STEV79L+7Y08dCYArzBBXYTN7Yw3iMIdz+2cMVSPU=
-github.com/cdvelop/unixid v0.0.52/go.mod h1:Uu0ski3qnb9xOVtyLWm67G5zwydqoVp+cNGFQTNgE7c=
+github.com/cdvelop/unixid v0.0.53 h1:OCuF8GcPK09U5PdOOzmUOmw17ceIL9DY+klIBaYOpp4=
+github.com/cdvelop/unixid v0.0.53/go.mod h1:tSUjTKO4Pz9VE+cfPY5k4dTYiMT8w/jqU3h/7uJ6snE=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
