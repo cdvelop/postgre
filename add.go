@@ -3,17 +3,22 @@ package postgre
 import (
 	"log"
 	"os"
-	"sync"
 
-	"github.com/cdvelop/model"
 	"github.com/cdvelop/objectdb"
-	"github.com/cdvelop/timeserver"
-	"github.com/cdvelop/unixid"
 	_ "github.com/lib/pq"
 )
 
 // env_password_name ej: DB_PASSWORD_POSTGRE
-func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
+func NewConnection(dba *PG, tables_in ...*struct {
+	Name   string     //tabla ej: users,products,staff
+	Legend string     // como se ve para el usuario ej: user por Usuarios
+	Fields []struct { // campos
+		Name   string // ej: id_user,name_user,phone
+		Legend string // ej: "Nombre"
+		Type   string // default TEXT
+		Unique bool   //campo único e inalterable en db
+	}
+}) *objectdb.Connection {
 
 	const e = "postgres new connection error: "
 
@@ -40,17 +45,12 @@ func NewConnection(dba *PG, tables ...*model.Object) *objectdb.Connection {
 
 	dba.passwordDB = password
 
-	uid, err := unixid.NewHandler(timeserver.Add(), &sync.Mutex{}, unixid.NoSessionNumber{})
-	if err != "" {
-		showErrorAndExit(e + err)
-	}
-
-	dba.idUnix = uid
-
 	db := objectdb.Get(dba)
 
+	dba.unixID = db
+
 	// chequear tablas base de datos
-	db.CreateTablesInDB(tables, func(err string) {
+	db.AddTablesToDB(tables_in, func(err string) {
 		if err != "" {
 			showErrorAndExit(e + err)
 		}

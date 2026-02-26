@@ -25,7 +25,7 @@ func (d *PG) backupWindowsDB() {
 	const e = "backupWindowsDB error "
 	pg_dump := fmt.Sprintf("%v/bin/pg_dump.exe", installation_directory)
 
-	name_file_backup, err := d.idUnix.GetNewID()
+	name_file_backup, err := d.GetNewID()
 	if err != "" {
 		log.Println(e + err)
 		return

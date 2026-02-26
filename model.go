@@ -1,9 +1,11 @@
 package postgre
 
-import "github.com/cdvelop/unixid"
-
 type ScheduleAdapter interface {
 	AddFuncToSchedule(schedule, description string, fun any, args ...any) (err string)
+}
+
+type unixID interface {
+	GetNewID() (new_id, err string)
 }
 
 // PG formato cadena conexión
@@ -23,5 +25,5 @@ type PG struct {
 
 	passwordDB string //contraseña
 
-	idUnix *unixid.UnixID
+	unixID
 }
