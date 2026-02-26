@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cdvelop/postgre"
+	postgres "github.com/tinywasm/postgres"
 	"github.com/tinywasm/orm"
 )
 
@@ -71,31 +71,22 @@ func TestPostgresAdapter(t *testing.T) {
 		t.Fatalf("Failed to setup schema: %v", err)
 	}
 
-	// Initialize Adapter
-	adapter, err := postgre.New(dsn)
+	// Initialize Adapter (now returns *orm.DB)
+	dbORM, err := postgres.New(dsn)
 	if err != nil {
 		t.Fatalf("Failed to create adapter: %v", err)
 	}
 
 	// Test Create
 	user := &User{Name: "Alice", Email: "alice@example.com", CreatedAt: time.Now()}
-	qCreate := orm.Query{
-		Action:  orm.ActionCreate,
-		Table:   user.TableName(),
-		Columns: []string{"name", "email", "created_at"},
-		Values:  []any{user.Name, user.Email, user.CreatedAt},
-	}
-	if err := adapter.Execute(qCreate, user, nil, nil); err != nil {
+	if err := dbORM.Create(user); err != nil {
 		t.Errorf("Create failed: %v", err)
 	}
 
 	// Test ReadAll
-	qReadAll := orm.Query{
-		Action: orm.ActionReadAll,
-		Table:  user.TableName(),
-	}
 	var users []orm.Model
-	err = adapter.Execute(qReadAll, nil, NewUser, func(m orm.Model) {
+	// Use Query(model) to start a query for that table.
+	err = dbORM.Query(NewUser()).ReadAll(NewUser, func(m orm.Model) {
 		users = append(users, m)
 	})
 	if err != nil {
@@ -106,13 +97,9 @@ func TestPostgresAdapter(t *testing.T) {
 	}
 
 	// Test ReadOne (by Name)
-	qReadOne := orm.Query{
-		Action: orm.ActionReadOne,
-		Table:  user.TableName(),
-		Conditions: []orm.Condition{orm.Eq("name", "Alice")},
-	}
 	foundUser := &User{}
-	if err := adapter.Execute(qReadOne, foundUser, nil, nil); err != nil {
+	// Query().Where().ReadOne()
+	if err := dbORM.Query(foundUser).Where(orm.Eq("name", "Alice")).ReadOne(); err != nil {
 		t.Errorf("ReadOne failed: %v", err)
 	}
 	if foundUser.Name != "Alice" {
@@ -120,24 +107,13 @@ func TestPostgresAdapter(t *testing.T) {
 	}
 
 	// Test Update
-	qUpdate := orm.Query{
-		Action:     orm.ActionUpdate,
-		Table:      user.TableName(),
-		Columns:    []string{"email"},
-		Values:     []any{"alice_new@example.com"},
-		Conditions: []orm.Condition{orm.Eq("name", "Alice")},
-	}
-	if err := adapter.Execute(qUpdate, nil, nil, nil); err != nil {
+	foundUser.Email = "alice_new@example.com"
+	if err := dbORM.Update(foundUser, orm.Eq("name", "Alice")); err != nil {
 		t.Errorf("Update failed: %v", err)
 	}
 
 	// Test Delete
-	qDelete := orm.Query{
-		Action:     orm.ActionDelete,
-		Table:      user.TableName(),
-		Conditions: []orm.Condition{orm.Eq("name", "Alice")},
-	}
-	if err := adapter.Execute(qDelete, nil, nil, nil); err != nil {
+	if err := dbORM.Delete(foundUser, orm.Eq("name", "Alice")); err != nil {
 		t.Errorf("Delete failed: %v", err)
 	}
 }

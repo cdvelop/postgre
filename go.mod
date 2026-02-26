@@ -1,10 +1,9 @@
-module github.com/cdvelop/postgre
+module github.com/tinywasm/postgres
 
 go 1.25.2
 
 require (
 	github.com/lib/pq v1.10.9
+	github.com/tinywasm/fmt v0.18.5
 	github.com/tinywasm/orm v0.0.6
 )
-
-require github.com/tinywasm/fmt v0.18.5 // indirect

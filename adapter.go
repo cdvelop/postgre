@@ -1,4 +1,4 @@
-package postgre
+package postgres
 
 import (
 	"database/sql"
@@ -12,8 +12,8 @@ type PostgresAdapter struct {
 	db *sql.DB
 }
 
-// New creates a new PostgresAdapter.
-func New(dataSourceName string) (*PostgresAdapter, error) {
+// New creates a new PostgresAdapter wrapped in an ORM DB.
+func New(dataSourceName string) (*orm.DB, error) {
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,8 @@ func New(dataSourceName string) (*PostgresAdapter, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-	return &PostgresAdapter{db: db}, nil
+	adapter := &PostgresAdapter{db: db}
+	return orm.New(adapter), nil
 }
 
 // Ensure PostgresAdapter satisfies orm.Adapter.
