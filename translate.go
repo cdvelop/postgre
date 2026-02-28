@@ -1,34 +1,32 @@
 package postgre
 
 import (
-	"fmt"
-	"strings"
-
+	. "github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 )
 
 // translate converts an ORM query to a PostgreSQL query and arguments.
 func translate(q orm.Query) (string, []any, error) {
-	var sb strings.Builder
+	sb := Convert()
 	var args []any
 	argIndex := 1
 
 	switch q.Action {
 	case orm.ActionCreate:
-		sb.WriteString("INSERT INTO ")
-		sb.WriteString(q.Table)
-		sb.WriteString(" (")
-		sb.WriteString(strings.Join(q.Columns, ", "))
-		sb.WriteString(") VALUES (")
+		sb.Write("INSERT INTO ")
+		sb.Write(q.Table)
+		sb.Write(" (")
+		sb.Write(Convert(q.Columns).Join(", ").String())
+		sb.Write(") VALUES (")
 		for i, v := range q.Values {
 			if i > 0 {
-				sb.WriteString(", ")
+				sb.Write(", ")
 			}
-			sb.WriteString(fmt.Sprintf("$%d", argIndex))
+			sb.Write(Sprintf("$%d", argIndex))
 			args = append(args, v)
 			argIndex++
 		}
-		sb.WriteString(")")
+		sb.Write(")")
 		// Append RETURNING id if it's likely expected, although not strictly in generic ORM spec.
 		// However, many ORMs rely on LastInsertId which Postgres doesn't support via Result.
 		// So we often need `RETURNING id`.
@@ -40,67 +38,67 @@ func translate(q orm.Query) (string, []any, error) {
 		// Let's stick to standard INSERT for now. If tests fail on ID retrieval, we'll revisit.
 
 	case orm.ActionReadOne, orm.ActionReadAll:
-		sb.WriteString("SELECT ")
+		sb.Write("SELECT ")
 		if len(q.Columns) == 0 {
-			sb.WriteString("*")
+			sb.Write("*")
 		} else {
-			sb.WriteString(strings.Join(q.Columns, ", "))
+			sb.Write(Convert(q.Columns).Join(", ").String())
 		}
-		sb.WriteString(" FROM ")
-		sb.WriteString(q.Table)
-		if err := buildConditions(&sb, q.Conditions, &args, &argIndex); err != nil {
+		sb.Write(" FROM ")
+		sb.Write(q.Table)
+		if err := buildConditions(sb, q.Conditions, &args, &argIndex); err != nil {
 			return "", nil, err
 		}
 		if len(q.OrderBy) > 0 {
-			sb.WriteString(" ORDER BY ")
+			sb.Write(" ORDER BY ")
 			for i, o := range q.OrderBy {
 				if i > 0 {
-					sb.WriteString(", ")
+					sb.Write(", ")
 				}
-				sb.WriteString(o.Column()) // Changed from o.Field to o.Column()
-				sb.WriteString(" ")
-				sb.WriteString(o.Dir())    // Changed from checking o.Desc to o.Dir() which returns "ASC" or "DESC"
+				sb.Write(o.Column()) // Changed from o.Field to o.Column()
+				sb.Write(" ")
+				sb.Write(o.Dir()) // Changed from checking o.Desc to o.Dir() which returns "ASC" or "DESC"
 			}
 		}
 		if q.Limit > 0 {
-			sb.WriteString(fmt.Sprintf(" LIMIT %d", q.Limit))
+			sb.Write(Sprintf(" LIMIT %d", q.Limit))
 		}
 		if q.Offset > 0 {
-			sb.WriteString(fmt.Sprintf(" OFFSET %d", q.Offset))
+			sb.Write(Sprintf(" OFFSET %d", q.Offset))
 		}
 
 	case orm.ActionUpdate:
-		sb.WriteString("UPDATE ")
-		sb.WriteString(q.Table)
-		sb.WriteString(" SET ")
+		sb.Write("UPDATE ")
+		sb.Write(q.Table)
+		sb.Write(" SET ")
 		for i, c := range q.Columns {
 			if i > 0 {
-				sb.WriteString(", ")
+				sb.Write(", ")
 			}
-			sb.WriteString(c)
-			sb.WriteString(fmt.Sprintf(" = $%d", argIndex))
+			sb.Write(c)
+			sb.Write(Sprintf(" = $%d", argIndex))
 			args = append(args, q.Values[i])
 			argIndex++
 		}
-		if err := buildConditions(&sb, q.Conditions, &args, &argIndex); err != nil {
+		if err := buildConditions(sb, q.Conditions, &args, &argIndex); err != nil {
 			return "", nil, err
 		}
 
 	case orm.ActionDelete:
-		sb.WriteString("DELETE FROM ")
-		sb.WriteString(q.Table)
-		if err := buildConditions(&sb, q.Conditions, &args, &argIndex); err != nil {
+		sb.Write("DELETE FROM ")
+		sb.Write(q.Table)
+		if err := buildConditions(sb, q.Conditions, &args, &argIndex); err != nil {
 			return "", nil, err
 		}
 
 	default:
-		return "", nil, fmt.Errorf("unsupported action: %d", q.Action)
+		return "", nil, Errf("unsupported action: %d", q.Action)
 	}
 
 	return sb.String(), args, nil
 }
 
-func buildConditions(sb *strings.Builder, conditions []orm.Condition, args *[]any, argIndex *int) error {
+func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex *int) error {
 	if len(conditions) == 0 {
 		return nil
 	}
@@ -109,21 +107,21 @@ func buildConditions(sb *strings.Builder, conditions []orm.Condition, args *[]an
 	// But `orm.Condition` logic applies to how it connects to the *previous* condition.
 	// The first condition's logic is ignored or should be empty/AND (implicitly).
 
-	sb.WriteString(" WHERE ")
+	sb.Write(" WHERE ")
 	for i, c := range conditions {
 		if i > 0 {
 			logic := c.Logic()
 			if logic == "" {
 				logic = "AND"
 			}
-			sb.WriteString(fmt.Sprintf(" %s ", logic))
+			sb.Write(Sprintf(" %s ", logic))
 		}
 
-		sb.WriteString(c.Field())
-		sb.WriteString(" ")
-		sb.WriteString(c.Operator())
-		sb.WriteString(" ")
-		sb.WriteString(fmt.Sprintf("$%d", *argIndex))
+		sb.Write(c.Field())
+		sb.Write(" ")
+		sb.Write(c.Operator())
+		sb.Write(" ")
+		sb.Write(Sprintf("$%d", *argIndex))
 		*args = append(*args, c.Value())
 		*argIndex++
 	}

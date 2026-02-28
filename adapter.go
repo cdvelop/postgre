@@ -13,6 +13,8 @@ type PostgresAdapter struct {
 }
 
 // New creates a new PostgresAdapter wrapped in an orm.DB.
+// The dataSourceName parameter expects a valid PostgreSQL connection string.
+// Example: "postgres://user:password@host:port/dbname?sslmode=disable"
 func New(dataSourceName string) (*orm.DB, error) {
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {

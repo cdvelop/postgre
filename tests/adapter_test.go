@@ -43,7 +43,7 @@ func TestPostgresAdapter(t *testing.T) {
 	// Setup connection
 	dsn := os.Getenv("POSTGRES_DSN")
 	if dsn == "" {
-		dsn = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+		dsn = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 	}
 
 	// Try to connect to DB for setup
@@ -213,7 +213,7 @@ func TestPostgresAdapter(t *testing.T) {
 	})
 
 	// ReadOne without columns (trigger SELECT *)
-	type emptyUser2 struct { User }
+	type emptyUser2 struct{ User }
 	eUser := &emptyUser2{}
 	_ = dbORM.Query(eUser).ReadOne()
 
@@ -255,7 +255,7 @@ func TestPostgresAdapter(t *testing.T) {
 
 	qTxErr := orm.Query{
 		Action: orm.Action(-1),
-		Table: "users",
+		Table:  "users",
 	}
 	err = adapterClosed.Execute(qTxErr, nil, nil, nil)
 	if err == nil {
@@ -264,7 +264,7 @@ func TestPostgresAdapter(t *testing.T) {
 
 	// Try a bad scan via the closed adapter
 	qScanErr := orm.Query{Action: orm.ActionReadAll, Table: "users"}
-	err = adapterClosed.Execute(qScanErr, nil, NewUser, func(m orm.Model){})
+	err = adapterClosed.Execute(qScanErr, nil, NewUser, func(m orm.Model) {})
 	if err == nil {
 		t.Errorf("Expected err from execute ReadAll on closed db")
 	}
