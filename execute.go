@@ -3,8 +3,8 @@ package postgre
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
+	. "github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 )
 
@@ -89,7 +89,7 @@ func executeInternal(exec Executor, q orm.Query, m orm.Model, factory func() orm
 		return err
 
 	default:
-		return fmt.Errorf("unsupported action: %d", q.Action)
+		return Errf("unsupported action: %d", q.Action)
 	}
 }
 

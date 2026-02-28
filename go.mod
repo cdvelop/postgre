@@ -7,4 +7,4 @@ require (
 	github.com/tinywasm/orm v0.0.6
 )
 
-require github.com/tinywasm/fmt v0.18.5 // indirect
+require github.com/tinywasm/fmt v0.18.5
