@@ -1,24 +1,34 @@
-# PostgreSQL Adapter - Phase 2 (Refinements)
-
-This master prompt continues from the previous integration round, refining the API according to the latest domain requirements.
+# Implementation Plan: Upgrade Postgres Adapter API
 
 ## Development Rules
-- Constraints remain active: `gotest`, SRP, standard DI, pure stdlib testing, 500 lines limit, and flat hierarchy.
-- **WASM / TinyGo Compatibility (`gotest` requirement):** You MUST replace all usages of standard `fmt` and `strings` with `github.com/tinywasm/fmt`. This is strictly required for the `gotest` command to successfully pass its validations.
+- **WASM Environment (`tinywasm`):** Frontend Go Compatibility requires standard library replacements (`tinywasm/fmt`).
+- **Single Responsibility Principle (SRP):** Every file must have a single, well-defined purpose.
+- **Mandatory Dependency Injection (DI):** No global state. Interfaces for external dependencies.
+- **Testing Runner (`gotest`):** ALWAYS use the globally installed `gotest` CLI command. (If missing, run: `go install github.com/tinywasm/devflow/cmd/gotest@latest`).
+- **Standard Library Only in Tests:** NEVER use external assertion libraries.
+- **Documentation First:** Update docs before coding.
+
+## Goal
+Refactor the `tinywasm/postgres` adapter so that its initialization function directly returns a fully instantiated `*orm.DB` instance from `github.com/tinywasm/orm`. This eliminates the need for the user to write two lines of code to boot the database. Furthermore, add complex queries (including JOINs) to the test suite, ensure coverage is >90%, and update all documentation.
 
 ## Execution Steps
 
-### 1. Module Renaming
-- Update `go.mod` to establish the definitive new ecosystem package path: `module github.com/tinywasm/postgres` (replacing the old `github.com/cdvelop/postgre`).
-- Ensure any internal package references or internal files are updated natively to reflect `postgres` instead of `postgre` where applicable.
+### 1. Update Public API
+- Modify the adapter initialization signature in `adapter.go` (e.g., `postgres.Open` or `postgres.New`).
+- Internally instantiate the Postgres Executor and Compiler.
+- Pass them to `orm.New()` and return the resulting `*orm.DB`.
+- Ensure backwards compatibility is broken cleanly if necessary.
 
-### 2. Direct ORM Injection (`adapter.go`)
-- The user expressed that having to manually wrap `postgres.New(dsn)` with `orm.New()` is tedious.
-- Refactor the constructor `New(dataSourceName string)` to **directly return an `*orm.DB`**.
-- Example target signature: `func New(dataSourceName string) (*orm.DB, error)`.
-- The internal logic of `New` will naturally create the internal `*sql.DB` connection, instantiate the `PostgresAdapter`, wrap it by calling `orm.New(adapter)`, and return the ready-to-use ORM `*DB` wrapper.
-- The `PostgresAdapter` struct must remain internally mapped to safely satisfy `orm.Adapter` and `orm.TxAdapter`.
+### 2. Complex Queries & JOINs Tests
+- Add comprehensive tests in the `tests/` directory utilizing the `tinywasm/orm` Fluent API.
+- Create tests that explicitly execute complex `JOIN` queries to validate the SQL translation (`translate.go`).
+- Validate Postgres-specific syntax (e.g., `$1, $2` placeholders).
 
-### 3. Tests & Verification (`tests/`)
-- Ensure all tests in `tests/adapter_test.go` reflect the new constructor signature (they will receive `*orm.DB` directly and therefore have immediate access to `db.Create()`, `db.Tx()`, etc.).
-- Validate implementation fully with `gotest`.
+### 3. Coverage > 90%
+- Run `gotest`.
+- Identify uncovered lines in `execute.go`, `translate.go`, `tx.go`, and `adapter.go`.
+- Add mock or integration tests specifically targeting error paths and edge cases until the coverage is strictly greater than 90%.
+
+### 4. Update Documentation
+- **CRITICAL:** The `README.md` must be updated to show the new single-line initialization returning `*orm.DB`.
+- Update architecture or skill docs if the change affects the public contract.
