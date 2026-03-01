@@ -44,7 +44,7 @@ func AdapterForTest(db *sql.DB) *PostgresAdapter {
 
 // Compile compiles the ORM query into a Plan.
 func (p *PostgresAdapter) Compile(q orm.Query, m orm.Model) (orm.Plan, error) {
-	query, args, err := translate(q)
+	query, args, err := translate(q, m)
 	if err != nil {
 		return orm.Plan{}, err
 	}
