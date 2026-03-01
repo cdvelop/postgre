@@ -7,19 +7,43 @@ import (
 	"github.com/tinywasm/orm"
 )
 
-// PostgresTx wraps a SQL transaction and implements orm.TxBound.
+// PostgresTx wraps a SQL transaction.
 type PostgresTx struct {
-	tx *sql.Tx
+	tx      *sql.Tx
+	adapter *PostgresAdapter
 }
 
-// Ensure PostgresTx satisfies orm.TxBound.
-var _ orm.TxBound = (*PostgresTx)(nil)
+// Ensure PostgresTx implements orm.Compiler.
+var _ orm.Compiler = (*PostgresTx)(nil)
 
-// Execute executes a query within the transaction.
-func (p *PostgresTx) Execute(q orm.Query, m orm.Model, factory func() orm.Model, each func(orm.Model)) error {
-	// Need to call `executeInternal` which takes an Executor.
-	// sql.Tx implements Executor.
-	return executeInternal(p.tx, q, m, factory, each)
+// Ensure PostgresTx implements orm.Executor.
+var _ orm.Executor = (*PostgresTx)(nil)
+
+// Compile delegates to the PostgresAdapter.
+func (p *PostgresTx) Compile(q orm.Query, m orm.Model) (orm.Plan, error) {
+	return p.adapter.Compile(q, m)
+}
+
+// Exec executes a query within the transaction.
+func (p *PostgresTx) Exec(query string, args ...any) error {
+	_, err := p.tx.Exec(query, args...)
+	return err
+}
+
+// QueryRow executes a query that is expected to return at most one row within the transaction.
+func (p *PostgresTx) QueryRow(query string, args ...any) orm.Scanner {
+	return p.tx.QueryRow(query, args...)
+}
+
+// Query executes a query that returns rows within the transaction.
+func (p *PostgresTx) Query(query string, args ...any) (orm.Rows, error) {
+	return p.tx.Query(query, args...)
+}
+
+// Close is a no-op for generic Executor but here we could rollback if active.
+// We let orm.DB handle transaction lifecycle.
+func (p *PostgresTx) Close() error {
+	return nil
 }
 
 // Commit commits the transaction.
@@ -32,15 +56,11 @@ func (p *PostgresTx) Rollback() error {
 	return p.tx.Rollback()
 }
 
-// BeginTx starts a new transaction on the adapter.
-// This overrides the placeholder in adapter.go (if we had kept it separate, but since `BeginTx` is part of `PostgresAdapter` methods).
-// We'll define `BeginTx` here for `PostgresAdapter`.
-
-// BeginTx starts a transaction.
-func (p *PostgresAdapter) BeginTx() (orm.TxBound, error) {
+// BeginTx starts a transaction and returns a new orm.TxBoundExecutor.
+func (p *PostgresAdapter) BeginTx() (orm.TxBoundExecutor, error) {
 	tx, err := p.db.BeginTx(context.Background(), nil)
 	if err != nil {
 		return nil, err
 	}
-	return &PostgresTx{tx: tx}, nil
+	return &PostgresTx{tx: tx, adapter: p}, nil
 }
