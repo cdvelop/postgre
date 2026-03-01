@@ -103,10 +103,6 @@ func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex
 		return nil
 	}
 
-	// Check if the first condition has logic, if not, it's implicitly part of the WHERE block start.
-	// But `orm.Condition` logic applies to how it connects to the *previous* condition.
-	// The first condition's logic is ignored or should be empty/AND (implicitly).
-
 	sb.Write(" WHERE ")
 	for i, c := range conditions {
 		if i > 0 {
@@ -117,13 +113,34 @@ func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex
 			sb.Write(Sprintf(" %s ", logic))
 		}
 
-		sb.Write(c.Field())
-		sb.Write(" ")
-		sb.Write(c.Operator())
-		sb.Write(" ")
-		sb.Write(Sprintf("$%d", *argIndex))
-		*args = append(*args, c.Value())
-		*argIndex++
+		if c.Operator() == "IN" {
+			slice, ok := c.Value().([]any)
+			if !ok {
+				return Errf("IN operator requires []any value, got %T", c.Value())
+			}
+			if len(slice) == 0 {
+				return Err("IN operator slice cannot be empty")
+			}
+			sb.Write(c.Field())
+			sb.Write(" IN (")
+			for j, val := range slice {
+				if j > 0 {
+					sb.Write(", ")
+				}
+				sb.Write(Sprintf("$%d", *argIndex))
+				*args = append(*args, val)
+				(*argIndex)++
+			}
+			sb.Write(")")
+		} else {
+			sb.Write(c.Field())
+			sb.Write(" ")
+			sb.Write(c.Operator())
+			sb.Write(" ")
+			sb.Write(Sprintf("$%d", *argIndex))
+			*args = append(*args, c.Value())
+			(*argIndex)++
+		}
 	}
 	return nil
 }

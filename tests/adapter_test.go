@@ -110,6 +110,29 @@ func TestPostgresAdapter(t *testing.T) {
 		t.Errorf("Expected 2 users from limit, got %d", len(users))
 	}
 
+	// 2.b Test IN Operator
+	var inUsers []orm.Model
+	err = dbORM.Query(&User{}).Where("id").In([]any{1, 2}).ReadAll(NewUser, func(m orm.Model) {
+		inUsers = append(inUsers, m)
+	})
+	if err != nil {
+		t.Errorf("IN operator ReadAll failed: %v", err)
+	}
+	if len(inUsers) != 2 {
+		t.Errorf("Expected 2 users from IN, got %d", len(inUsers))
+	}
+
+	// 2.c Test IN internal coverage format (slice of different types/missing)
+	_, err = dbORM.RawExecutor().(orm.Compiler).Compile(orm.Query{Action: orm.ActionReadAll, Table: "t", Conditions: []orm.Condition{orm.In("id", 1)}}, nil)
+	if err == nil {
+		t.Errorf("Expected compile error for non-slice IN value")
+	}
+
+	_, err = dbORM.RawExecutor().(orm.Compiler).Compile(orm.Query{Action: orm.ActionReadAll, Table: "t", Conditions: []orm.Condition{orm.In("id", []any{})}}, nil)
+	if err == nil {
+		t.Errorf("Expected compile error for empty slice IN value")
+	}
+
 	// 3. Test ReadOne
 	foundUser := &User{}
 	err = dbORM.Query(foundUser).Where("name").Eq("Alice").ReadOne()
