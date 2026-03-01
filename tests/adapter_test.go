@@ -22,8 +22,13 @@ func (u *User) TableName() string {
 	return "users"
 }
 
-func (u *User) Columns() []string {
-	return []string{"id", "name", "email", "created_at"}
+func (u *User) Schema() []orm.Field {
+	return []orm.Field{
+		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
+		{Name: "name"}, // Type string is zero value in orm.FieldType, postgresType returns TEXT for default
+		{Name: "email"},
+		{Name: "created_at"}, // mapped to TEXT since TypeDate/Time might not be defined
+	}
 }
 
 func (u *User) Values() []any {
@@ -38,6 +43,15 @@ func (u *User) Pointers() []any {
 func NewUser() orm.Model {
 	return &User{}
 }
+
+type MockModel struct {
+	schema []orm.Field
+}
+
+func (m *MockModel) TableName() string { return "mock" }
+func (m *MockModel) Schema() []orm.Field { return m.schema }
+func (m *MockModel) Values() []any { return nil }
+func (m *MockModel) Pointers() []any { return nil }
 
 func TestPostgresAdapter(t *testing.T) {
 	// Setup connection
@@ -217,6 +231,70 @@ func TestPostgresAdapter(t *testing.T) {
 	err = dbORM.Query(emptyUser).ReadOne()
 	if err == nil {
 		// Just covering empty conditions in translate.go, might not fail ReadOne depending on driver
+	}
+
+	// Test CreateTable, DropTable, CreateDatabase via Compiler explicitly
+	testCompiler := dbORM.RawExecutor().(orm.Compiler)
+
+	// CreateTable user
+	createTablePlan, err := testCompiler.Compile(orm.Query{Action: orm.ActionCreateTable, Table: "users"}, &User{})
+	if err != nil {
+		t.Fatalf("Failed to compile CreateTable: %v", err)
+	}
+	expectedCreate := "CREATE TABLE IF NOT EXISTS users (id BIGSERIAL PRIMARY KEY, name TEXT, email TEXT, created_at TEXT)"
+	if createTablePlan.Query != expectedCreate {
+		t.Errorf("CreateTable query mismatch. expected: %q, got: %q", expectedCreate, createTablePlan.Query)
+	}
+
+	// CreateTable with constraints (Unique, Not Null, FK, INT SERIAL)
+	type Item struct {
+		ID     int
+		UserID int
+		Name   string
+		Price  float64
+		Active bool
+		Data   []byte
+	}
+	itemSchema := []orm.Field{
+		{Name: "id", Type: 2, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement}, // not TypeInt64, so it uses SERIAL
+		{Name: "user_id", Type: orm.TypeInt64, Ref: "users", RefColumn: "id"},
+		{Name: "name", Constraints: orm.ConstraintNotNull | orm.ConstraintUnique},
+		{Name: "price", Type: orm.TypeFloat64},
+		{Name: "active", Type: orm.TypeBool},
+		{Name: "data", Type: orm.TypeBlob},
+	}
+	// override Schema
+	// Since we can't easily override schema on struct literal without defining it properly, we'll just mock it.
+
+	// CreateTable with FK and constraints via a mock model
+	mockModel := &MockModel{schema: itemSchema}
+	createPlan2, err := testCompiler.Compile(orm.Query{Action: orm.ActionCreateTable, Table: "items"}, mockModel)
+	if err != nil {
+		t.Fatalf("Failed to compile CreateTable with constraints: %v", err)
+	}
+	expectedCreate2 := "CREATE TABLE IF NOT EXISTS items (id SERIAL PRIMARY KEY, user_id BIGINT, name TEXT NOT NULL UNIQUE, price DOUBLE PRECISION, active BOOLEAN, data BYTEA, CONSTRAINT fk_items_user_id FOREIGN KEY (user_id) REFERENCES users(id))"
+	if createPlan2.Query != expectedCreate2 {
+		t.Errorf("CreateTable constraints mismatch. expected: %q, got: %q", expectedCreate2, createPlan2.Query)
+	}
+
+	// DropTable
+	dropPlan, err := testCompiler.Compile(orm.Query{Action: orm.ActionDropTable, Table: "users"}, nil)
+	if err != nil {
+		t.Fatalf("Failed to compile DropTable: %v", err)
+	}
+	expectedDrop := "DROP TABLE IF EXISTS users"
+	if dropPlan.Query != expectedDrop {
+		t.Errorf("DropTable query mismatch. expected: %q, got: %q", expectedDrop, dropPlan.Query)
+	}
+
+	// CreateDatabase
+	dbPlan, err := testCompiler.Compile(orm.Query{Action: orm.ActionCreateDatabase, Database: "test_db"}, nil)
+	if err != nil {
+		t.Fatalf("Failed to compile CreateDatabase: %v", err)
+	}
+	expectedDb := "CREATE DATABASE test_db"
+	if dbPlan.Query != expectedDb {
+		t.Errorf("CreateDatabase query mismatch. expected: %q, got: %q", expectedDb, dbPlan.Query)
 	}
 
 	// Multiple conditions logic

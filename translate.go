@@ -6,7 +6,22 @@ import (
 )
 
 // translate converts an ORM query to a PostgreSQL query and arguments.
-func translate(q orm.Query) (string, []any, error) {
+func postgresType(t orm.FieldType) string {
+	switch t {
+	case orm.TypeInt64:
+		return "BIGINT"
+	case orm.TypeFloat64:
+		return "DOUBLE PRECISION"
+	case orm.TypeBool:
+		return "BOOLEAN"
+	case orm.TypeBlob:
+		return "BYTEA"
+	default:
+		return "TEXT"
+	}
+}
+
+func translate(q orm.Query, m orm.Model) (string, []any, error) {
 	sb := Convert()
 	var args []any
 	argIndex := 1
@@ -90,6 +105,62 @@ func translate(q orm.Query) (string, []any, error) {
 		if err := buildConditions(sb, q.Conditions, &args, &argIndex); err != nil {
 			return "", nil, err
 		}
+
+	case orm.ActionCreateTable:
+		sb.Write("CREATE TABLE IF NOT EXISTS ")
+		sb.Write(q.Table)
+		sb.Write(" (")
+		fields := m.Schema()
+		for i, f := range fields {
+			if i > 0 {
+				sb.Write(", ")
+			}
+			sb.Write(f.Name)
+			sb.Write(" ")
+			isPK := f.Constraints&orm.ConstraintPK != 0
+			isAuto := f.Constraints&orm.ConstraintAutoIncrement != 0
+			if isPK && isAuto {
+				if f.Type == orm.TypeInt64 {
+					sb.Write("BIGSERIAL")
+				} else {
+					sb.Write("SERIAL")
+				}
+			} else if isAuto && f.Type == orm.TypeInt64 {
+				sb.Write("BIGSERIAL")
+			} else if isAuto {
+				sb.Write("SERIAL")
+			} else {
+				sb.Write(postgresType(f.Type))
+			}
+			if isPK {
+				sb.Write(" PRIMARY KEY")
+			}
+			if f.Constraints&orm.ConstraintNotNull != 0 {
+				sb.Write(" NOT NULL")
+			}
+			if f.Constraints&orm.ConstraintUnique != 0 {
+				sb.Write(" UNIQUE")
+			}
+		}
+		for _, f := range fields {
+			if f.Ref != "" {
+				refCol := f.RefColumn
+				if refCol == "" {
+					refCol = "id"
+				}
+				sb.Write(Sprintf(", CONSTRAINT fk_%s_%s FOREIGN KEY (%s) REFERENCES %s(%s)",
+					q.Table, f.Name, f.Name, f.Ref, refCol))
+			}
+		}
+		sb.Write(")")
+
+	case orm.ActionDropTable:
+		sb.Write("DROP TABLE IF EXISTS ")
+		sb.Write(q.Table)
+
+	case orm.ActionCreateDatabase:
+		sb.Write("CREATE DATABASE ")
+		sb.Write(q.Database)
 
 	default:
 		return "", nil, Errf("unsupported action: %d", q.Action)
