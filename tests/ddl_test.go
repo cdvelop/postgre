@@ -1,0 +1,128 @@
+package tests
+
+import (
+	"os"
+	"testing"
+
+	"github.com/cdvelop/postgre"
+	"github.com/tinywasm/orm"
+)
+
+type MinimalModel struct {
+	ID   int    `db:"pk,autoincrement"`
+	Name string `db:"unique,not_null"`
+}
+
+func (m *MinimalModel) TableName() string {
+	return "minimal_models"
+}
+
+func (m *MinimalModel) Schema() []orm.Field {
+	return []orm.Field{
+		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
+		{Name: "name", Constraints: orm.ConstraintUnique | orm.ConstraintNotNull}, // 0 is zero value, postgresType defaults to TEXT
+	}
+}
+
+func (m *MinimalModel) Values() []any {
+	return []any{m.ID, m.Name}
+}
+
+func (m *MinimalModel) Pointers() []any {
+	return []any{&m.ID, &m.Name}
+}
+
+func NewMinimalModel() orm.Model {
+	return &MinimalModel{}
+}
+
+type RelatedModel struct {
+	ID        int
+	MinimalID int
+}
+
+func (r *RelatedModel) TableName() string {
+	return "related_models"
+}
+
+func (r *RelatedModel) Schema() []orm.Field {
+	return []orm.Field{
+		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
+		{Name: "minimal_id", Type: orm.TypeInt64, Ref: "minimal_models", RefColumn: "id"},
+	}
+}
+
+func (r *RelatedModel) Values() []any {
+	return []any{r.ID, r.MinimalID}
+}
+
+func (r *RelatedModel) Pointers() []any {
+	return []any{&r.ID, &r.MinimalID}
+}
+
+func NewRelatedModel() orm.Model {
+	return &RelatedModel{}
+}
+
+func TestDDL(t *testing.T) {
+	dsn := os.Getenv("POSTGRES_DSN")
+	if dsn == "" {
+		dsn = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+	}
+
+	dbORM, err := postgre.New(dsn)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+	defer dbORM.Close()
+
+	// Ensure clean state before tests
+	_ = dbORM.DropTable(&RelatedModel{})
+	_ = dbORM.DropTable(&MinimalModel{})
+
+	// Test CreateTable IF NOT EXISTS (MinimalModel)
+	if err := dbORM.CreateTable(&MinimalModel{}); err != nil {
+		t.Fatalf("Failed to create MinimalModel table: %v", err)
+	}
+
+	// Should not fail if executed again
+	if err := dbORM.CreateTable(&MinimalModel{}); err != nil {
+		t.Fatalf("Failed to create MinimalModel table IF NOT EXISTS: %v", err)
+	}
+
+	// Test CreateTable with FK (RelatedModel)
+	if err := dbORM.CreateTable(&RelatedModel{}); err != nil {
+		t.Fatalf("Failed to create RelatedModel table with FK: %v", err)
+	}
+
+	// Insert data to verify table creation constraints
+	minimal1 := &MinimalModel{Name: "Test 1"}
+	if err := dbORM.Create(minimal1); err != nil {
+		t.Fatalf("Failed to insert into MinimalModel: %v", err)
+	}
+
+	// Check Not Null / Unique constraints
+	minimalDuplicate := &MinimalModel{Name: "Test 1"}
+	if err := dbORM.Create(minimalDuplicate); err == nil {
+		t.Fatalf("Expected unique constraint violation")
+	}
+
+	// Insert into related to check FK
+	badRelated := &RelatedModel{MinimalID: 9999}
+	if err := dbORM.Create(badRelated); err == nil {
+		t.Fatalf("Expected FK constraint violation")
+	}
+
+	// Clean up tables
+	if err := dbORM.DropTable(&RelatedModel{}); err != nil {
+		t.Fatalf("Failed to drop RelatedModel table: %v", err)
+	}
+	if err := dbORM.DropTable(&MinimalModel{}); err != nil {
+		t.Fatalf("Failed to drop MinimalModel table: %v", err)
+	}
+
+	// Should not fail if dropped again
+	if err := dbORM.DropTable(&MinimalModel{}); err != nil {
+		t.Fatalf("Failed to drop MinimalModel table IF EXISTS: %v", err)
+	}
+}
