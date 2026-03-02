@@ -36,6 +36,6 @@ func main() {
 - Support for `Create`, `ReadOne`, `ReadAll`, `Update`, `Delete`.
 - Efficient row scanning.
 
-## Testing
+## Documentation
 
-Run tests using `go test ./tests/...`. Note that integration tests require a running PostgreSQL instance and `POSTGRES_DSN` environment variable set.
+- [Postgres Setup & Troubleshooting](docs/POSTGRES_SETUP.md)

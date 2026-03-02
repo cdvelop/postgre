@@ -67,7 +67,7 @@ func NewRelatedModel() orm.Model {
 func TestDDL(t *testing.T) {
 	dsn := os.Getenv("POSTGRES_DSN")
 	if dsn == "" {
-		dsn = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+		dsn = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 	}
 
 	dbORM, err := postgre.New(dsn)
