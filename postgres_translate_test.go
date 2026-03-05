@@ -1,0 +1,99 @@
+//go:build !wasm
+
+package postgre_test
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/tinywasm/orm"
+	postgre "github.com/cdvelop/postgre"
+)
+
+// testUserModel is a minimal test model with a TEXT primary key (string PK, like unixid).
+type testUserModel struct {
+	ID   string
+	Name string
+	Age  int
+}
+
+func (u *testUserModel) TableName() string { return "users" }
+func (u *testUserModel) Schema() []orm.Field {
+	return []orm.Field{
+		{Name: "id", Type: orm.TypeText, Constraints: orm.ConstraintPK},
+		{Name: "name", Type: orm.TypeText},
+		{Name: "age", Type: orm.TypeInt64},
+	}
+}
+func (u *testUserModel) Values() []any   { return []any{u.ID, u.Name, u.Age} }
+func (u *testUserModel) Pointers() []any { return []any{&u.ID, &u.Name, &u.Age} }
+
+// TestTranslate_Update_WithCondition verifies that translate() generates a
+// valid UPDATE ... SET ... WHERE ... when at least one condition is present.
+// This is the contract guaranteed by tinywasm/orm's mandatory first Condition.
+func TestTranslate_Update_WithCondition(t *testing.T) {
+	m := &testUserModel{ID: "abc123", Name: "Alice", Age: 30}
+	q := orm.Query{
+		Action:  orm.ActionUpdate,
+		Table:   "users",
+		Columns: []string{"id", "name", "age"},
+		Values:  m.Values(),
+		// At least one condition — as guaranteed by tinywasm/orm after the fix.
+		Conditions: []orm.Condition{orm.Eq("id", "abc123")},
+	}
+
+	sql, args, err := postgre.ExportTranslate(q, m)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	// Must contain WHERE clause.
+	if !strings.Contains(sql, "WHERE") {
+		t.Errorf("expected WHERE clause in UPDATE, got: %s", sql)
+	}
+
+	// Must use parameterized form ($N for postgres).
+	if !strings.Contains(sql, "$") {
+		t.Errorf("expected parameterized query, got: %s", sql)
+	}
+
+	// Condition value must appear in args.
+	pkFound := false
+	for _, a := range args {
+		if a == "abc123" {
+			pkFound = true
+			break
+		}
+	}
+	if !pkFound {
+		t.Errorf("expected PK value 'abc123' in args, got: %v", args)
+	}
+}
+
+// TestTranslate_Update_MultipleConditions verifies that AND conditions in an
+// UPDATE query produce correct SQL.
+func TestTranslate_Update_MultipleConditions(t *testing.T) {
+	m := &testUserModel{ID: "abc123", Name: "Alice", Age: 30}
+	q := orm.Query{
+		Action:  orm.ActionUpdate,
+		Table:   "users",
+		Columns: []string{"id", "name", "age"},
+		Values:  m.Values(),
+		Conditions: []orm.Condition{
+			orm.Eq("id", "abc123"),
+			orm.Eq("name", "Alice"),
+		},
+	}
+
+	sql, args, err := postgre.ExportTranslate(q, m)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(sql, "WHERE") {
+		t.Errorf("expected WHERE in SQL, got: %s", sql)
+	}
+	if !strings.Contains(sql, "AND") {
+		t.Errorf("expected AND between conditions, got: %s", sql)
+	}
+	_ = args
+}

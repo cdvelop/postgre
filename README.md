@@ -36,6 +36,19 @@ func main() {
 - Support for `Create`, `ReadOne`, `ReadAll`, `Update`, `Delete`.
 - Efficient row scanning.
 
+## Update
+
+`db.Update` always requires at least one `Condition`. This is enforced at
+compile time by `tinywasm/orm`. There is no "update by PK implicitly" magic.
+
+```go
+// ✅ Correct
+if err := db.Update(&user, orm.Eq(User_.ID, user.ID)); err != nil { ... }
+
+// ❌ Compile error (caught by tinywasm/orm — will not reach the PostgreSQL layer)
+db.Update(&user)
+```
+
 ## Documentation
 
 - [Postgres Setup & Troubleshooting](docs/POSTGRES_SETUP.md)
