@@ -111,6 +111,16 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 		sb.Write(q.Table)
 		sb.Write(" (")
 		fields := m.Schema()
+
+		// Count composite PK fields upfront to decide between inline and table-level PK.
+		var pkCols []string
+		for _, f := range fields {
+			if f.Constraints&orm.ConstraintPK != 0 {
+				pkCols = append(pkCols, f.Name)
+			}
+		}
+		compositePK := len(pkCols) > 1
+
 		for i, f := range fields {
 			if i > 0 {
 				sb.Write(", ")
@@ -119,7 +129,7 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 			sb.Write(" ")
 			isPK := f.Constraints&orm.ConstraintPK != 0
 			isAuto := f.Constraints&orm.ConstraintAutoIncrement != 0
-			if isPK && isAuto {
+			if isPK && isAuto && !compositePK {
 				if f.Type == orm.TypeInt64 {
 					sb.Write("BIGSERIAL")
 				} else {
@@ -133,7 +143,12 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 				sb.Write(postgresType(f.Type))
 			}
 			if isPK {
-				sb.Write(" PRIMARY KEY")
+				if compositePK {
+					// Composite PK: columns must be NOT NULL; constraint emitted as table-level below.
+					sb.Write(" NOT NULL")
+				} else {
+					sb.Write(" PRIMARY KEY")
+				}
 			}
 			if f.Constraints&orm.ConstraintNotNull != 0 {
 				sb.Write(" NOT NULL")
@@ -141,6 +156,9 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 			if f.Constraints&orm.ConstraintUnique != 0 {
 				sb.Write(" UNIQUE")
 			}
+		}
+		if compositePK {
+			sb.Write(Sprintf(", PRIMARY KEY (%s)", Convert(pkCols).Join(", ").String()))
 		}
 		for _, f := range fields {
 			if f.Ref != "" {
