@@ -81,8 +81,7 @@ func TestPostgresAdapter(t *testing.T) {
 		CREATE TABLE users (
 			id SERIAL PRIMARY KEY,
 			name TEXT,
-			email TEXT,
-			created_at TIMESTAMP
+			email TEXT
 		);
 	`)
 	if err != nil {
