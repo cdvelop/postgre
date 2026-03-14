@@ -1,20 +1,20 @@
 package postgre
 
 import (
-	. "github.com/tinywasm/fmt"
+	"github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 )
 
 // translate converts an ORM query to a PostgreSQL query and arguments.
-func postgresType(t orm.FieldType) string {
+func postgresType(t fmt.FieldType) string {
 	switch t {
-	case orm.TypeInt64:
+	case fmt.FieldInt:
 		return "BIGINT"
-	case orm.TypeFloat64:
+	case fmt.FieldFloat:
 		return "DOUBLE PRECISION"
-	case orm.TypeBool:
+	case fmt.FieldBool:
 		return "BOOLEAN"
-	case orm.TypeBlob:
+	case fmt.FieldBlob:
 		return "BYTEA"
 	default:
 		return "TEXT"
@@ -22,7 +22,7 @@ func postgresType(t orm.FieldType) string {
 }
 
 func translate(q orm.Query, m orm.Model) (string, []any, error) {
-	sb := Convert()
+	sb := fmt.Convert()
 	var args []any
 	argIndex := 1
 
@@ -31,13 +31,13 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 		sb.Write("INSERT INTO ")
 		sb.Write(q.Table)
 		sb.Write(" (")
-		sb.Write(Convert(q.Columns).Join(", ").String())
+		sb.Write(fmt.Convert(q.Columns).Join(", ").String())
 		sb.Write(") VALUES (")
 		for i, v := range q.Values {
 			if i > 0 {
 				sb.Write(", ")
 			}
-			sb.Write(Sprintf("$%d", argIndex))
+			sb.Write(fmt.Sprintf("$%d", argIndex))
 			args = append(args, v)
 			argIndex++
 		}
@@ -57,7 +57,7 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 		if len(q.Columns) == 0 {
 			sb.Write("*")
 		} else {
-			sb.Write(Convert(q.Columns).Join(", ").String())
+			sb.Write(fmt.Convert(q.Columns).Join(", ").String())
 		}
 		sb.Write(" FROM ")
 		sb.Write(q.Table)
@@ -76,10 +76,10 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 			}
 		}
 		if q.Limit > 0 {
-			sb.Write(Sprintf(" LIMIT %d", q.Limit))
+			sb.Write(fmt.Sprintf(" LIMIT %d", q.Limit))
 		}
 		if q.Offset > 0 {
-			sb.Write(Sprintf(" OFFSET %d", q.Offset))
+			sb.Write(fmt.Sprintf(" OFFSET %d", q.Offset))
 		}
 
 	case orm.ActionUpdate:
@@ -91,7 +91,7 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 				sb.Write(", ")
 			}
 			sb.Write(c)
-			sb.Write(Sprintf(" = $%d", argIndex))
+			sb.Write(fmt.Sprintf(" = $%d", argIndex))
 			args = append(args, q.Values[i])
 			argIndex++
 		}
@@ -115,7 +115,7 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 		// Count composite PK fields upfront to decide between inline and table-level PK.
 		var pkCols []string
 		for _, f := range fields {
-			if f.Constraints&orm.ConstraintPK != 0 {
+			if f.PK {
 				pkCols = append(pkCols, f.Name)
 			}
 		}
@@ -127,15 +127,15 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 			}
 			sb.Write(f.Name)
 			sb.Write(" ")
-			isPK := f.Constraints&orm.ConstraintPK != 0
-			isAuto := f.Constraints&orm.ConstraintAutoIncrement != 0
+			isPK := f.PK
+			isAuto := f.AutoInc
 			if isPK && isAuto && !compositePK {
-				if f.Type == orm.TypeInt64 {
+				if f.Type == fmt.FieldInt {
 					sb.Write("BIGSERIAL")
 				} else {
 					sb.Write("SERIAL")
 				}
-			} else if isAuto && f.Type == orm.TypeInt64 {
+			} else if isAuto && f.Type == fmt.FieldInt {
 				sb.Write("BIGSERIAL")
 			} else if isAuto {
 				sb.Write("SERIAL")
@@ -150,26 +150,32 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 					sb.Write(" PRIMARY KEY")
 				}
 			}
-			if f.Constraints&orm.ConstraintNotNull != 0 {
+			if f.NotNull {
 				sb.Write(" NOT NULL")
 			}
-			if f.Constraints&orm.ConstraintUnique != 0 {
+			if f.Unique {
 				sb.Write(" UNIQUE")
 			}
 		}
 		if compositePK {
-			sb.Write(Sprintf(", PRIMARY KEY (%s)", Convert(pkCols).Join(", ").String()))
+			sb.Write(fmt.Sprintf(", PRIMARY KEY (%s)", fmt.Convert(pkCols).Join(", ").String()))
 		}
-		for _, f := range fields {
-			if f.Ref != "" {
-				refCol := f.RefColumn
-				if refCol == "" {
-					refCol = "id"
+		// orm.FieldExt is used for FKs. Since m.Schema() returns []fmt.Field,
+		// we need to check if the implementation provided FieldExt.
+		// In tinywasm/orm, models that have FKs can optionally implement an extended schema.
+		if ext, ok := m.(interface{ SchemaExt() []orm.FieldExt }); ok {
+			for _, f := range ext.SchemaExt() {
+				if f.Ref != "" {
+					refCol := f.RefColumn
+					if refCol == "" {
+						refCol = "id"
+					}
+					sb.Write(fmt.Sprintf(", CONSTRAINT fk_%s_%s FOREIGN KEY (%s) REFERENCES %s(%s)",
+						q.Table, f.Name, f.Name, f.Ref, refCol))
 				}
-				sb.Write(Sprintf(", CONSTRAINT fk_%s_%s FOREIGN KEY (%s) REFERENCES %s(%s)",
-					q.Table, f.Name, f.Name, f.Ref, refCol))
 			}
 		}
+
 		sb.Write(")")
 
 	case orm.ActionDropTable:
@@ -181,13 +187,13 @@ func translate(q orm.Query, m orm.Model) (string, []any, error) {
 		sb.Write(q.Database)
 
 	default:
-		return "", nil, Errf("unsupported action: %d", q.Action)
+		return "", nil, fmt.Errf("unsupported action: %d", q.Action)
 	}
 
 	return sb.String(), args, nil
 }
 
-func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex *int) error {
+func buildConditions(sb *fmt.Conv, conditions []orm.Condition, args *[]any, argIndex *int) error {
 	if len(conditions) == 0 {
 		return nil
 	}
@@ -199,16 +205,16 @@ func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex
 			if logic == "" {
 				logic = "AND"
 			}
-			sb.Write(Sprintf(" %s ", logic))
+			sb.Write(fmt.Sprintf(" %s ", logic))
 		}
 
 		if c.Operator() == "IN" {
 			slice, ok := c.Value().([]any)
 			if !ok {
-				return Errf("IN operator requires []any value, got %T", c.Value())
+				return fmt.Errf("IN operator requires []any value, got %T", c.Value())
 			}
 			if len(slice) == 0 {
-				return Err("IN operator slice cannot be empty")
+				return fmt.Err("IN operator slice cannot be empty")
 			}
 			sb.Write(c.Field())
 			sb.Write(" IN (")
@@ -216,7 +222,7 @@ func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex
 				if j > 0 {
 					sb.Write(", ")
 				}
-				sb.Write(Sprintf("$%d", *argIndex))
+				sb.Write(fmt.Sprintf("$%d", *argIndex))
 				*args = append(*args, val)
 				(*argIndex)++
 			}
@@ -226,7 +232,7 @@ func buildConditions(sb *Conv, conditions []orm.Condition, args *[]any, argIndex
 			sb.Write(" ")
 			sb.Write(c.Operator())
 			sb.Write(" ")
-			sb.Write(Sprintf("$%d", *argIndex))
+			sb.Write(fmt.Sprintf("$%d", *argIndex))
 			*args = append(*args, c.Value())
 			(*argIndex)++
 		}

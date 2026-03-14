@@ -4,39 +4,33 @@ import (
 	"database/sql"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/cdvelop/postgre"
+	"github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 )
 
 // Define a simple model for testing
 type User struct {
-	ID        int
-	Name      string
-	Email     string
-	CreatedAt time.Time
+	ID    int64
+	Name  string
+	Email string
 }
 
 func (u *User) TableName() string {
 	return "users"
 }
 
-func (u *User) Schema() []orm.Field {
-	return []orm.Field{
-		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
-		{Name: "name"}, // Type string is zero value in orm.FieldType, postgresType returns TEXT for default
-		{Name: "email"},
-		{Name: "created_at"}, // mapped to TEXT since TypeDate/Time might not be defined
+func (u *User) Schema() []fmt.Field {
+	return []fmt.Field{
+		{Name: "id", Type: fmt.FieldInt, PK: true, AutoInc: true},
+		{Name: "name", Type: fmt.FieldText},
+		{Name: "email", Type: fmt.FieldText},
 	}
 }
 
-func (u *User) Values() []any {
-	return []any{u.ID, u.Name, u.Email, u.CreatedAt}
-}
-
 func (u *User) Pointers() []any {
-	return []any{&u.ID, &u.Name, &u.Email, &u.CreatedAt}
+	return []any{&u.ID, &u.Name, &u.Email}
 }
 
 // Factory function
@@ -45,13 +39,22 @@ func NewUser() orm.Model {
 }
 
 type MockModel struct {
-	schema []orm.Field
+	schema []fmt.Field
 }
 
 func (m *MockModel) TableName() string { return "mock" }
-func (m *MockModel) Schema() []orm.Field { return m.schema }
-func (m *MockModel) Values() []any { return nil }
+func (m *MockModel) Schema() []fmt.Field { return m.schema }
 func (m *MockModel) Pointers() []any { return nil }
+
+type MockModelExt struct {
+	MockModel
+}
+
+func (m *MockModelExt) SchemaExt() []orm.FieldExt {
+	return []orm.FieldExt{
+		{Field: fmt.Field{Name: "user_id", Type: fmt.FieldInt}, Ref: "users", RefColumn: "id"},
+	}
+}
 
 func TestPostgresAdapter(t *testing.T) {
 	// Setup connection
@@ -93,15 +96,15 @@ func TestPostgresAdapter(t *testing.T) {
 	}
 
 	// 1. Test Create
-	user1 := &User{ID: 1, Name: "Alice", Email: "alice@example.com", CreatedAt: time.Now()}
+	user1 := &User{ID: 1, Name: "Alice", Email: "alice@example.com"}
 	if err := dbORM.Create(user1); err != nil {
 		t.Errorf("Create failed: %v", err)
 	}
-	user2 := &User{ID: 2, Name: "Bob", Email: "bob@example.com", CreatedAt: time.Now()}
+	user2 := &User{ID: 2, Name: "Bob", Email: "bob@example.com"}
 	if err := dbORM.Create(user2); err != nil {
 		t.Errorf("Create failed: %v", err)
 	}
-	user3 := &User{ID: 3, Name: "Charlie", Email: "charlie@example.com", CreatedAt: time.Now()}
+	user3 := &User{ID: 3, Name: "Charlie", Email: "charlie@example.com"}
 	if err := dbORM.Create(user3); err != nil {
 		t.Errorf("Create failed: %v", err)
 	}
@@ -177,7 +180,7 @@ func TestPostgresAdapter(t *testing.T) {
 
 	// 6. Test Transactions
 	err = dbORM.Tx(func(tx *orm.DB) error {
-		u := &User{Name: "TxUser", Email: "tx@test.com", CreatedAt: time.Now()}
+		u := &User{Name: "TxUser", Email: "tx@test.com"}
 		if err := tx.Create(u); err != nil {
 			return err
 		}
@@ -199,7 +202,7 @@ func TestPostgresAdapter(t *testing.T) {
 
 	// 7. Test Successful Transaction (Commit)
 	err = dbORM.Tx(func(tx *orm.DB) error {
-		u := &User{ID: 4, Name: "TxUser2", Email: "tx2@test.com", CreatedAt: time.Now()}
+		u := &User{ID: 4, Name: "TxUser2", Email: "tx2@test.com"}
 		return tx.Create(u)
 	})
 	if err != nil {
@@ -241,38 +244,38 @@ func TestPostgresAdapter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to compile CreateTable: %v", err)
 	}
-	expectedCreate := "CREATE TABLE IF NOT EXISTS users (id BIGSERIAL PRIMARY KEY, name TEXT, email TEXT, created_at TEXT)"
+	expectedCreate := "CREATE TABLE IF NOT EXISTS users (id BIGSERIAL PRIMARY KEY, name TEXT, email TEXT)"
 	if createTablePlan.Query != expectedCreate {
 		t.Errorf("CreateTable query mismatch. expected: %q, got: %q", expectedCreate, createTablePlan.Query)
 	}
 
 	// CreateTable with constraints (Unique, Not Null, FK, INT SERIAL)
 	type Item struct {
-		ID     int
-		UserID int
+		ID     int64
+		UserID int64
 		Name   string
 		Price  float64
 		Active bool
 		Data   []byte
 	}
-	itemSchema := []orm.Field{
-		{Name: "id", Type: 2, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement}, // not TypeInt64, so it uses SERIAL
-		{Name: "user_id", Type: orm.TypeInt64, Ref: "users", RefColumn: "id"},
-		{Name: "name", Constraints: orm.ConstraintNotNull | orm.ConstraintUnique},
-		{Name: "price", Type: orm.TypeFloat64},
-		{Name: "active", Type: orm.TypeBool},
-		{Name: "data", Type: orm.TypeBlob},
+	itemSchema := []fmt.Field{
+		{Name: "id", Type: fmt.FieldInt, PK: true, AutoInc: true}, // we use BIGSERIAL for FieldInt if PK/AutoInc
+		{Name: "user_id", Type: fmt.FieldInt},
+		{Name: "name", Type: fmt.FieldText, NotNull: true, Unique: true},
+		{Name: "price", Type: fmt.FieldFloat},
+		{Name: "active", Type: fmt.FieldBool},
+		{Name: "data", Type: fmt.FieldBlob},
 	}
 	// override Schema
 	// Since we can't easily override schema on struct literal without defining it properly, we'll just mock it.
 
 	// CreateTable with FK and constraints via a mock model
-	mockModel := &MockModel{schema: itemSchema}
+	mockModel := &MockModelExt{MockModel: MockModel{schema: itemSchema}}
 	createPlan2, err := testCompiler.Compile(orm.Query{Action: orm.ActionCreateTable, Table: "items"}, mockModel)
 	if err != nil {
 		t.Fatalf("Failed to compile CreateTable with constraints: %v", err)
 	}
-	expectedCreate2 := "CREATE TABLE IF NOT EXISTS items (id SERIAL PRIMARY KEY, user_id BIGINT, name TEXT NOT NULL UNIQUE, price DOUBLE PRECISION, active BOOLEAN, data BYTEA, CONSTRAINT fk_items_user_id FOREIGN KEY (user_id) REFERENCES users(id))"
+	expectedCreate2 := "CREATE TABLE IF NOT EXISTS items (id BIGSERIAL PRIMARY KEY, user_id BIGINT, name TEXT NOT NULL UNIQUE, price DOUBLE PRECISION, active BOOLEAN, data BYTEA, CONSTRAINT fk_items_user_id FOREIGN KEY (user_id) REFERENCES users(id))"
 	if createPlan2.Query != expectedCreate2 {
 		t.Errorf("CreateTable constraints mismatch. expected: %q, got: %q", expectedCreate2, createPlan2.Query)
 	}

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 	postgre "github.com/cdvelop/postgre"
 )
@@ -14,18 +15,17 @@ import (
 type testUserModel struct {
 	ID   string
 	Name string
-	Age  int
+	Age  int64
 }
 
 func (u *testUserModel) TableName() string { return "users" }
-func (u *testUserModel) Schema() []orm.Field {
-	return []orm.Field{
-		{Name: "id", Type: orm.TypeText, Constraints: orm.ConstraintPK},
-		{Name: "name", Type: orm.TypeText},
-		{Name: "age", Type: orm.TypeInt64},
+func (u *testUserModel) Schema() []fmt.Field {
+	return []fmt.Field{
+		{Name: "id", Type: fmt.FieldText, PK: true},
+		{Name: "name", Type: fmt.FieldText},
+		{Name: "age", Type: fmt.FieldInt},
 	}
 }
-func (u *testUserModel) Values() []any   { return []any{u.ID, u.Name, u.Age} }
 func (u *testUserModel) Pointers() []any { return []any{&u.ID, &u.Name, &u.Age} }
 
 // TestTranslate_Update_WithCondition verifies that translate() generates a
@@ -37,7 +37,7 @@ func TestTranslate_Update_WithCondition(t *testing.T) {
 		Action:  orm.ActionUpdate,
 		Table:   "users",
 		Columns: []string{"id", "name", "age"},
-		Values:  m.Values(),
+		Values:  fmt.ReadValues(m.Schema(), m.Pointers()),
 		// At least one condition — as guaranteed by tinywasm/orm after the fix.
 		Conditions: []orm.Condition{orm.Eq("id", "abc123")},
 	}
@@ -78,7 +78,7 @@ func TestTranslate_Update_MultipleConditions(t *testing.T) {
 		Action:  orm.ActionUpdate,
 		Table:   "users",
 		Columns: []string{"id", "name", "age"},
-		Values:  m.Values(),
+		Values:  fmt.ReadValues(m.Schema(), m.Pointers()),
 		Conditions: []orm.Condition{
 			orm.Eq("id", "abc123"),
 			orm.Eq("name", "Alice"),
