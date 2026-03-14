@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/cdvelop/postgre"
+	"github.com/tinywasm/fmt"
 	"github.com/tinywasm/orm"
 )
 
 type MinimalModel struct {
-	ID   int    `db:"pk,autoincrement"`
+	ID   int64  `db:"pk,autoincrement"`
 	Name string `db:"unique,not_null"`
 }
 
@@ -17,15 +18,11 @@ func (m *MinimalModel) TableName() string {
 	return "minimal_models"
 }
 
-func (m *MinimalModel) Schema() []orm.Field {
-	return []orm.Field{
-		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
-		{Name: "name", Constraints: orm.ConstraintUnique | orm.ConstraintNotNull}, // 0 is zero value, postgresType defaults to TEXT
+func (m *MinimalModel) Schema() []fmt.Field {
+	return []fmt.Field{
+		{Name: "id", Type: fmt.FieldInt, PK: true, AutoInc: true},
+		{Name: "name", Type: fmt.FieldText, Unique: true, NotNull: true},
 	}
-}
-
-func (m *MinimalModel) Values() []any {
-	return []any{m.ID, m.Name}
 }
 
 func (m *MinimalModel) Pointers() []any {
@@ -37,23 +34,25 @@ func NewMinimalModel() orm.Model {
 }
 
 type RelatedModel struct {
-	ID        int
-	MinimalID int
+	ID        int64
+	MinimalID int64
 }
 
 func (r *RelatedModel) TableName() string {
 	return "related_models"
 }
 
-func (r *RelatedModel) Schema() []orm.Field {
-	return []orm.Field{
-		{Name: "id", Type: orm.TypeInt64, Constraints: orm.ConstraintPK | orm.ConstraintAutoIncrement},
-		{Name: "minimal_id", Type: orm.TypeInt64, Ref: "minimal_models", RefColumn: "id"},
+func (r *RelatedModel) Schema() []fmt.Field {
+	return []fmt.Field{
+		{Name: "id", Type: fmt.FieldInt, PK: true, AutoInc: true},
+		{Name: "minimal_id", Type: fmt.FieldInt},
 	}
 }
 
-func (r *RelatedModel) Values() []any {
-	return []any{r.ID, r.MinimalID}
+func (r *RelatedModel) SchemaExt() []orm.FieldExt {
+	return []orm.FieldExt{
+		{Field: fmt.Field{Name: "minimal_id"}, Ref: "minimal_models", RefColumn: "id"},
+	}
 }
 
 func (r *RelatedModel) Pointers() []any {
